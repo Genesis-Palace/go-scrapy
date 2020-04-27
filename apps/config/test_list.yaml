@@ -1,0 +1,51 @@
+version: 1.0.0
+kind: crawlerOptions
+
+pages:
+  labels:
+    page46:
+      url: http://nyncw.cq.gov.cn/zwxx_161/mtbb
+      parser: .gl-list a
+      meta:
+        city: 重庆
+        publisher: 重庆市农业农村委员会
+        mediaid: 123456789
+
+    page34:
+      url: http://www.hunan.gov.cn/szf/zfhyjtj/hyztrb.html
+      parser: .yl-listbox ul li a
+      meta:
+        city: 长沙
+        publisher: 长沙市人民政府
+        mediaid: 987654321
+      next-parser:
+        g:
+          title: .sp_title
+        r:
+          pub_time: (name="PubDate" content="(.*?)")
+
+broker:
+  redis:
+    host: 127.0.0.1:6379
+    db: 0
+    topic: test-redis-broker
+#  nsq:
+#    urls:
+#      - http://127.0.0.1:4151/pub?
+#    topic: gov-feeds
+#    channel: list
+
+consumer:
+  redis:
+    host: 127.0.0.1:6379
+    db: 0
+    topic: test-redis-broker
+  limit: 10
+
+#  nsq:
+#    urls:
+#      - 127.0.0.1:4150
+#    topic: gov-feeds
+#    channel: list
+#  limit: 20
+
