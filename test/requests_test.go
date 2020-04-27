@@ -2,7 +2,7 @@ package test
 
 import (
 	"github.com/Genesis-Palace/requests"
-	"go-srapy/internal"
+	"go-scrapy/internal"
 	"testing"
 	"time"
 )
