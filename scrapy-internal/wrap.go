@@ -1,4 +1,4 @@
-package internal
+package scrapy_internal
 
 import (
 	"sync"
@@ -19,4 +19,3 @@ func (w *WaitGroupWrap) Wrap(cb func()) {
 func Once(f func()) {
 	once.Do(f)
 }
-

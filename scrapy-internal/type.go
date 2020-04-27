@@ -1,4 +1,4 @@
-package internal
+package scrapy_internal
 
 import (
 	"crypto/md5"
@@ -14,7 +14,7 @@ func (s *String) Replace(pattern string) String {
 	return String(strings.ReplaceAll(string(*s), pattern, ""))
 }
 
-func (s *String) Decode()[]byte{
+func (s *String) Decode() []byte {
 	return []byte(*s)
 }
 
@@ -49,9 +49,9 @@ func (m *Map) Items() map[String]interface{} {
 	return m.m
 }
 
-func (m *Map) Load(b []byte) (error){
+func (m *Map) Load(b []byte) error {
 	err := json.Unmarshal(b, &m.m)
-	if err != nil{
+	if err != nil {
 		return err
 	}
 	return nil
@@ -93,7 +93,7 @@ func (m *Map) Dumps() (String, error) {
 }
 
 func (m *Map) del(k String) interface{} {
-	if v, ok := m.m[k]; ok{
+	if v, ok := m.m[k]; ok {
 		delete(m.m, k)
 		return v
 	}

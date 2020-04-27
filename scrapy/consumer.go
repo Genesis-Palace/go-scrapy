@@ -1,8 +1,8 @@
-package crawler
+package scrapy
 
 import (
 	"encoding/binary"
-	"github.com/Genesis-Palace/go-scrapy/internal"
+	"github.com/Genesis-Palace/go-scrapy/scrapy-internal"
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/go-redis/redis"
 	"github.com/nsqio/go-nsq"
@@ -36,7 +36,7 @@ func (n *nsqConsumer) Init() {
 }
 
 func (n *nsqConsumer) Run() {
-	var waiter internal.WaitGroupWrap
+	var waiter scrapy_internal.WaitGroupWrap
 	for s := 0; s < len(n.Urls); s++ {
 		var err error
 		waiter.Wrap(func() {
@@ -72,7 +72,7 @@ func (n *nsqConsumer) HandleMessage(msg *nsq.Message) (err error) {
 }
 
 type RedisConsumer struct {
-	ch       chan internal.String
+	ch       chan scrapy_internal.String
 	Host     string
 	Password string
 	Db       int
@@ -107,7 +107,7 @@ func (r *RedisConsumer) Run() {
 			time.Sleep(time.Second)
 			continue
 		}
-		s := internal.String(str)
+		s := scrapy_internal.String(str)
 		if s.Empty() {
 			continue
 		}

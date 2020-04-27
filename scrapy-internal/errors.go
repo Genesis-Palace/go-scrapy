@@ -1,4 +1,4 @@
-package internal
+package scrapy_internal
 
 const (
 	ParserNotFound = iota

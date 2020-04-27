@@ -1,4 +1,4 @@
-package internal
+package scrapy_internal
 
 import (
 	"encoding/xml"
@@ -17,7 +17,6 @@ type ItemInterfaceI interface {
 type MapItem struct {
 	*Map
 }
-
 
 type ListItem struct {
 	*List
@@ -48,22 +47,22 @@ type Feeds struct {
 	Channel *Channel `xml:"channel"`
 }
 
-func (f *Feeds) Add(v interface{}){
+func (f *Feeds) Add(v interface{}) {
 	switch v.(type) {
 	case *XmlItem:
 		f.Channel.AddItem(v.(*XmlItem))
 	}
 }
 
-func (f *Feeds) Empty() bool{
+func (f *Feeds) Empty() bool {
 	return len(f.Channel.Item) == 0
 }
 
 type Channel struct {
-	Title         string  `xml:"title"`
-	Link          string  `xml:"link"`
-	Description   string  `xml:"description"`
-	LastBuildDate string  `xml:"lastBuildDate"`
+	Title         string     `xml:"title"`
+	Link          string     `xml:"link"`
+	Description   string     `xml:"description"`
+	LastBuildDate string     `xml:"lastBuildDate"`
 	Item          []*XmlItem `xml:"item"`
 	sync.RWMutex
 }
@@ -78,7 +77,7 @@ func (c *Channel) AddLastPubTime(pub string) {
 	c.LastBuildDate = pub
 }
 
-func (f *Feeds) Dumps() (String, error){
+func (f *Feeds) Dumps() (String, error) {
 	feeds, err := xml.Marshal(f)
 	if err != nil {
 		panic(err)

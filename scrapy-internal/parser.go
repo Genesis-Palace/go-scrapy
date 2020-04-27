@@ -1,4 +1,4 @@
-package internal
+package scrapy_internal
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ type ParserResult struct {
 	Value interface{}
 }
 
-func (p *ParserResult) String() string{
+func (p *ParserResult) String() string {
 	return fmt.Sprintf(`(Key: %s), (Value: %v)`, p.Key, p.Value)
 }
 
@@ -57,7 +57,7 @@ type GoQueryParser struct {
 	DefaultParser
 }
 
-func (g *GoQueryParser) Parser(html String, item ItemInterfaceI, sss... string) (ItemInterfaceI, bool) {
+func (g *GoQueryParser) Parser(html String, item ItemInterfaceI, sss ...string) (ItemInterfaceI, bool) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html.String()))
 	if err != nil {
 		log.Error(err)
@@ -128,11 +128,11 @@ type RegexParser struct {
 	DefaultParser
 }
 
-func (r*RegexParser) Parser(htm String, interfaceI ItemInterfaceI, s ...string) (i ItemInterfaceI, ret bool) {
+func (r *RegexParser) Parser(htm String, interfaceI ItemInterfaceI, s ...string) (i ItemInterfaceI, ret bool) {
 	key := newKey(htm, s...)
 	r.Html = htm.String()
 	var result = Regex(r.Html, r.Pattern.String())
-	if len(result) == 0{
+	if len(result) == 0 {
 		return
 	}
 	pr := NewPr(key, html.UnescapeString((result[0])))
@@ -141,16 +141,16 @@ func (r*RegexParser) Parser(htm String, interfaceI ItemInterfaceI, s ...string) 
 	return
 }
 
-func newKey(html String, s...string) string{
-	if len(s) == 0{
+func newKey(html String, s ...string) string {
+	if len(s) == 0 {
 		return html.Hash()
 	}
 	return s[0]
 }
 
-func NewPr(key string, value interface{}) *ParserResult{
+func NewPr(key string, value interface{}) *ParserResult {
 	return &ParserResult{
-		Key:  key,
+		Key:   key,
 		Value: value,
 	}
 }

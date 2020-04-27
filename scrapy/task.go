@@ -1,7 +1,7 @@
-package crawler
+package scrapy
 
 import (
-	"github.com/Genesis-Palace/go-scrapy/internal"
+	"github.com/Genesis-Palace/go-scrapy/scrapy-internal"
 	"github.com/Genesis-Palace/requests"
 	"gopkg.in/go-playground/validator.v9"
 	"net/http"
@@ -10,10 +10,10 @@ import (
 )
 
 type Crawler struct {
-	Request *internal.Requests `validate:"required"`
-	Cb      func(i internal.ItemInterfaceI)
-	Parser  internal.ParserInterfaceI `validate:"required"`
-	Item    internal.ItemInterfaceI   `validate:"required"`
+	Request *scrapy_internal.Requests `validate:"required"`
+	Cb      func(i scrapy_internal.ItemInterfaceI)
+	Parser  scrapy_internal.ParserInterfaceI `validate:"required"`
+	Item    scrapy_internal.ItemInterfaceI   `validate:"required"`
 	sync.RWMutex
 }
 
@@ -22,7 +22,7 @@ func (t *Crawler) Validate() (err error) {
 	return v.Struct(t)
 }
 
-func (t *Crawler) SetPipelines(cb func(i internal.ItemInterfaceI)) {
+func (t *Crawler) SetPipelines(cb func(i scrapy_internal.ItemInterfaceI)) {
 	t.Lock()
 	defer t.Unlock()
 	t.Cb = cb
@@ -38,9 +38,9 @@ func (t *Crawler) Do() {
 		log.Error(err)
 		return
 	}
-	t.Parser.Parser(internal.String(internal.AutoGetHtmlEncode(res.Text())), t.Item)
+	t.Parser.Parser(scrapy_internal.String(scrapy_internal.AutoGetHtmlEncode(res.Text())), t.Item)
 	if t.Cb == nil {
-		t.Cb = internal.DefaultPipelines
+		t.Cb = scrapy_internal.DefaultPipelines
 	}
 	t.Cb(t.Item)
 }
@@ -54,14 +54,14 @@ func (t *Crawler) SetTimeOut(duration time.Duration) *Crawler {
 	t.Request.SetTimeOut(duration)
 	return t
 }
-func (t *Crawler) SetParser(i internal.ParserInterfaceI) *Crawler {
+func (t *Crawler) SetParser(i scrapy_internal.ParserInterfaceI) *Crawler {
 	t.Lock()
 	defer t.Unlock()
 	t.Parser = i
 	return t
 }
 
-func (t *Crawler) SetPostJson(json internal.String) *Crawler {
+func (t *Crawler) SetPostJson(json scrapy_internal.String) *Crawler {
 	t.Request.Json(json)
 	return t
 }
@@ -76,17 +76,17 @@ func (t *Crawler) SetCookies(cookie *http.Cookie) *Crawler {
 	return t
 }
 
-func NewCrawler(url internal.String, item internal.ItemInterfaceI) *Crawler {
-	item.Add(internal.NewPr("url", url))
+func NewCrawler(url scrapy_internal.String, item scrapy_internal.ItemInterfaceI) *Crawler {
+	item.Add(scrapy_internal.NewPr("url", url))
 	return &Crawler{
-		Request: internal.NewRequest(url),
+		Request: scrapy_internal.NewRequest(url),
 		Item:    item,
 	}
 }
 
-func NewProxyCrawler(url internal.String, proxy *internal.AbuyunProxy, item internal.ItemInterfaceI) *Crawler {
+func NewProxyCrawler(url scrapy_internal.String, proxy *scrapy_internal.AbuyunProxy, item scrapy_internal.ItemInterfaceI) *Crawler {
 	return &Crawler{
-		Request: internal.NewRequest(url, internal.Use, proxy),
+		Request: scrapy_internal.NewRequest(url, scrapy_internal.Use, proxy),
 		Item:    item,
 	}
 }
