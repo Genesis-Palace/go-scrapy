@@ -1,4 +1,4 @@
-module go-srapy
+module go-scrapy
 
 go 1.13
 
