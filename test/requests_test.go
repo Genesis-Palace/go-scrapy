@@ -1,8 +1,8 @@
 package test
 
 import (
+	internal "github.com/Genesis-Palace/go-scrapy/scrapy-internal"
 	"github.com/Genesis-Palace/requests"
-	"go-scrapy/internal"
 	"testing"
 	"time"
 )
@@ -13,10 +13,10 @@ func TestNewRequest(t *testing.T) {
 			var url internal.String = "http://httpbin.org/headers"
 			req := internal.NewRequest(url)
 			req.SetHeader(requests.Header{
-				"Host": "www.abuyun.com",
-				"Referer": "https://www.abuyun.com/http-proxy/dyn-manual.html",
+				"Host":       "www.abuyun.com",
+				"Referer":    "https://www.abuyun.com/http-proxy/dyn-manual.html",
 				"User-Agent": "Mozilla/5.0 (Macintosh; Intel …) Gecko/20100101 Firefox/75.0",
-			},)
+			})
 			resp, err := req.Do()
 			if err != nil {
 				t.Error(err)
@@ -62,20 +62,20 @@ func TestNewRequestArgs(t *testing.T) {
 	req := internal.NewRequest(
 		url,
 		requests.Header{
-			"Host": "www.abuyun.com",
+			"Host":       "www.abuyun.com",
 			"Connection": "keep-alive",
-			"Referer": "https://www.abuyun.com/http-proxy/dyn-manual.html",
+			"Referer":    "https://www.abuyun.com/http-proxy/dyn-manual.html",
 			"User-Agent": "Mozilla/5.0 (Macintosh; Intel …) Gecko/20100101 Firefox/75.0",
 		},
 		internal.Use,
-		time.Duration(3) * time.Second,
+		time.Duration(3)*time.Second,
 	)
 	resp, err := req.Do()
-	if err != nil{
+	if err != nil {
 		t.Error(err)
 	}
 	t.Log(resp.Text())
-	for k, v := range resp.R.Request.Header{
+	for k, v := range resp.R.Request.Header {
 		t.Log(k, v)
 	}
 }

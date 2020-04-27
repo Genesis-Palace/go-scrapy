@@ -2,8 +2,8 @@ package test
 
 import (
 	"fmt"
-	"go-scrapy/crawler"
-	"go-scrapy/internal"
+	crawler "github.com/Genesis-Palace/go-scrapy/scrapy"
+	internal "github.com/Genesis-Palace/go-scrapy/scrapy-internal"
 	"testing"
 	"time"
 )
@@ -74,17 +74,17 @@ func TestNewTasks(t *testing.T) {
 		"https://www.toutiao.com/a6817772303032517128/",
 		//"http://www.toutiaonews.com/",
 	}
-	for _, url := range urls{
-		go func(url internal.String){
+	for _, url := range urls {
+		go func(url internal.String) {
 			var item = internal.NewMap()
 			item.Add(internal.NewPr("url", url))
 			item.Add(internal.NewPr("ts", time.Now().Unix()))
 			var parser = internal.NewMixdParser(internal.Pattern{
-				"title": internal.G("head title"),
-				"tag": internal.R(`chineseTag: '(.*?)'`),
-				"group_id": internal.R(`groupId: '(.*?)'`),
+				"title":     internal.G("head title"),
+				"tag":       internal.R(`chineseTag: '(.*?)'`),
+				"group_id":  internal.R(`groupId: '(.*?)'`),
 				"publisher": internal.R(`name: '(.*?)'`),
-				"uid": internal.R(`uid: '(.*?)'`),
+				"uid":       internal.R(`uid: '(.*?)'`),
 			})
 			task := crawler.NewCrawler(url, item)
 			task.SetTimeOut(3).SetParser(parser).Do()
@@ -93,34 +93,33 @@ func TestNewTasks(t *testing.T) {
 	time.Sleep(time.Second)
 }
 
-
-func TestNewCrawler(t *testing.T){
+func TestNewCrawler(t *testing.T) {
 	var uc = make(chan internal.String, 100)
-	go func(){
+	go func() {
 		var url = internal.String("http://www.toutiaonews.com")
 		var parser = internal.NewGoQueryParser(".newsList li dl dt a")
 		var item = internal.NewMap()
 		c := crawler.NewCrawler(url, item)
-		c.SetTimeOut(3*time.Second).SetParser(parser).Do()
+		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
 		host, _ := crawler.Url(url).Host()
 		fmt.Println(len(item.Items()))
-		for _, v := range item.Items()["href"].([]interface{}){
-			if _, err := crawler.Host(v.(string)); err != nil{
+		for _, v := range item.Items()["href"].([]interface{}) {
+			if _, err := crawler.Host(v.(string)); err != nil {
 				continue
 			}
 			uc <- internal.String(fmt.Sprintf("http://%s/%s", host, v))
 		}
 		close(uc)
 	}()
-	for u := range uc{
+	for u := range uc {
 		var parser = internal.NewMixdParser(internal.Pattern{
-			"title": internal.G(".article-body h1"),
-			"date": internal.R(`时间：([0-9].*[0-9])`),
+			"title":     internal.G(".article-body h1"),
+			"date":      internal.R(`时间：([0-9].*[0-9])`),
 			"recommend": internal.G(".related-recul li a"),
 		})
 		var item = internal.NewMap()
 		c := crawler.NewCrawler(u, item)
-		c.SetTimeOut(3*time.Second).SetParser(parser).Do()
+		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
 		break
 	}
 }
