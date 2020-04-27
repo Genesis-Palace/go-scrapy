@@ -2,10 +2,10 @@ package crawler
 
 import (
 	"encoding/binary"
+	"github.com/Genesis-Palace/go-scrapy/internal"
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/go-redis/redis"
 	"github.com/nsqio/go-nsq"
-	"go-scrapy/internal"
 	"time"
 )
 
@@ -16,7 +16,6 @@ func DecodeMessage(b []byte) (*nsq.Message, error) {
 	msg.Body = b
 	return &msg, nil
 }
-
 
 type ConsumerInterfaceI interface {
 	Init()
@@ -51,7 +50,7 @@ func (n *nsqConsumer) Run() {
 			if n.msgHandler == nil {
 				n.msgHandler = new(nsqConsumer)
 			}
-			time.Sleep(time.Duration(1000 / n.Limit) * time.Millisecond)
+			time.Sleep(time.Duration(1000/n.Limit) * time.Millisecond)
 			n.consumer.AddHandler(n.msgHandler)
 			err = n.consumer.ConnectToNSQDs(n.Urls)
 			if nil != err {
@@ -98,30 +97,29 @@ func (r *RedisConsumer) HandleMessage(msg *nsq.Message) (err error) {
 	return
 }
 
-
 func (r *RedisConsumer) Run() {
-	if r.f.HandleMessage == nil{
+	if r.f.HandleMessage == nil {
 		r.SetHandler(r)
 	}
 	for {
 		str, err := r.c.LPop(r.Topic).Result()
-		if err != nil{
+		if err != nil {
 			time.Sleep(time.Second)
 			continue
 		}
 		s := internal.String(str)
-		if s.Empty(){
+		if s.Empty() {
 			continue
 		}
 		msg, err := DecodeMessage(s.Decode())
-		if err != nil{
+		if err != nil {
 			log.Warning(msg)
 			continue
 		}
 		err = r.f.HandleMessage(msg)
-		if err != nil{
+		if err != nil {
 			log.Error(err)
 		}
-		time.Sleep(time.Duration(1000 / r.Limit) * time.Millisecond)
+		time.Sleep(time.Duration(1000/r.Limit) * time.Millisecond)
 	}
 }

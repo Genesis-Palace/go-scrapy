@@ -2,11 +2,11 @@ package crawler
 
 import (
 	"encoding/json"
+	"github.com/Genesis-Palace/go-scrapy/internal"
 	"github.com/Genesis-Palace/go-utils"
 	"github.com/Genesis-Palace/requests"
 	"github.com/go-redis/redis"
 	"github.com/goinggo/mapstructure"
-	"go-scrapy/internal"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"math/rand"
@@ -134,14 +134,14 @@ type Next struct {
 	R map[string]string
 }
 
-func (n *Next) Load(m map[string]interface{}) error{
+func (n *Next) Load(m map[string]interface{}) error {
 	if err := mapstructure.Decode(m, n); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (n *Next) MergeGr() (result internal.Pattern){
+func (n *Next) MergeGr() (result internal.Pattern) {
 	result = make(internal.Pattern)
 	for k, v := range n.G {
 		result[k] = internal.G(v)
@@ -320,4 +320,3 @@ func NewRedisBroker(host, password, topic string, db int) *RedisBroker {
 	broker.Init()
 	return broker
 }
-

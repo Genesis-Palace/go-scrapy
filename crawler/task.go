@@ -1,8 +1,8 @@
 package crawler
 
 import (
+	"github.com/Genesis-Palace/go-scrapy/internal"
 	"github.com/Genesis-Palace/requests"
-	"go-scrapy/internal"
 	"gopkg.in/go-playground/validator.v9"
 	"net/http"
 	"sync"
@@ -22,14 +22,14 @@ func (t *Crawler) Validate() (err error) {
 	return v.Struct(t)
 }
 
-func (t *Crawler) SetPipelines(cb func(i internal.ItemInterfaceI)){
+func (t *Crawler) SetPipelines(cb func(i internal.ItemInterfaceI)) {
 	t.Lock()
 	defer t.Unlock()
 	t.Cb = cb
 }
 
 func (t *Crawler) Do() {
-	if err := t.Validate(); err != nil{
+	if err := t.Validate(); err != nil {
 		log.Error(err)
 		return
 	}
