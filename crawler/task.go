@@ -2,7 +2,7 @@ package crawler
 
 import (
 	"github.com/Genesis-Palace/requests"
-	"go-srapy/internal"
+	"go-scrapy/internal"
 	"gopkg.in/go-playground/validator.v9"
 	"net/http"
 	"sync"

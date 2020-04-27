@@ -5,7 +5,7 @@ import (
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/go-redis/redis"
 	"github.com/nsqio/go-nsq"
-	"go-srapy/internal"
+	"go-scrapy/internal"
 	"time"
 )
 

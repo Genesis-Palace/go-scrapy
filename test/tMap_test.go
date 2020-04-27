@@ -2,8 +2,8 @@ package test
 
 import (
 	"fmt"
-	"go-srapy/crawler"
-	"go-srapy/internal"
+	"go-scrapy/crawler"
+	"go-scrapy/internal"
 	"testing"
 	"time"
 )

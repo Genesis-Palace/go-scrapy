@@ -6,7 +6,7 @@ import (
 	"github.com/Genesis-Palace/requests"
 	"github.com/go-redis/redis"
 	"github.com/goinggo/mapstructure"
-	"go-srapy/internal"
+	"go-scrapy/internal"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"math/rand"
