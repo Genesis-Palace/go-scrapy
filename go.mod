@@ -1,4 +1,4 @@
-module go-scrapy
+module github.com/Genesis-Palace/go-scrapy
 
 go 1.13
 
