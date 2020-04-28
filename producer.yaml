@@ -1,0 +1,44 @@
+
+version: 1.0.0
+kind: go-scrapy
+
+# 需要指定redis或nsq队列相关连接配置
+#redis
+  # host
+  # db
+  #password
+  #topic
+
+#nsq
+  # urls
+  # topics
+  # channel
+
+broker:
+  redis:
+    host: 127.0.0.1:6379
+    db: 0
+    password: 1234abcd
+    topic: test-redis-broker
+
+#  nsq:
+#    urls:
+#      - http://127.0.0.1:4151/pub?
+#    topic: test-nsq-broker
+#    channel: list
+
+
+# 采集配置信息相关
+pages:
+  labels:
+    sohu-news:
+      url: http://news.sohu.com/?spm=smpc.content.nav.2.1588039311808wmExlGP&_trans_=000014_bdss_dkwhfy
+      parser: .focus-news .news p a
+      meta:
+        from: 搜狐新闻
+      next-parser:
+        g:
+          title: .text-title h1
+          pub_time: "#news-time"
+          inner_source: "#user-info h4"
+          read_count: ".user-num > dd:nth-child(2) > span:nth-child(1) > em"
