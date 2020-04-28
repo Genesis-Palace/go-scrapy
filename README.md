@@ -93,6 +93,7 @@ func example3(){
 	var url internal.String = "https://www.toutiao.com/i6790992050591367684"
 	scrapy.NewProxyCrawler(url, proxy, item).SetParser(parser).SetTimeOut(1).Do()
 	fmt.Println(item.Items())
+}
 ```
 
 如果对项目有兴趣的同学可以试用, 遇到问题issue一下,  希望大家喜欢这个小工具(*^▽^*)
