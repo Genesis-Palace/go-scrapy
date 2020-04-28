@@ -102,7 +102,6 @@ func TestNewCrawler(t *testing.T) {
 		c := crawler.NewCrawler(url, item)
 		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
 		host, _ := crawler.Url(url).Host()
-		fmt.Println(len(item.Items()))
 		for _, v := range item.Items()["href"].([]interface{}) {
 			if _, err := crawler.Host(v.(string)); err != nil {
 				continue
@@ -120,6 +119,6 @@ func TestNewCrawler(t *testing.T) {
 		var item = internal.NewMap()
 		c := crawler.NewCrawler(u, item)
 		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
-		break
+		fmt.Println(item.Items())
 	}
 }

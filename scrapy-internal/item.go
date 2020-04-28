@@ -11,7 +11,6 @@ type ItemInterfaceI interface {
 	Add(v interface{})
 	Dumps() (String, error)
 	Empty() bool
-	Contains(string) bool
 }
 
 type MapItem struct {
