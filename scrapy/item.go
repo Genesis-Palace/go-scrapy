@@ -13,33 +13,6 @@ type ItemInterfaceI interface {
 	Empty() bool
 }
 
-type MapItem struct {
-	*Map
-}
-
-type ListItem struct {
-	*List
-}
-
-type StringItem struct {
-	String
-	sync.RWMutex
-}
-
-func (s *StringItem) Add(v interface{}) {
-	s.Lock()
-	defer s.Unlock()
-	switch v.(type) {
-	case String:
-		s.String = v.(String)
-	}
-}
-
-func (s *StringItem) Dumps() (str String, err error) {
-	str = s.String
-	return
-}
-
 type Feeds struct {
 	XMLName xml.Name `xml:"rss"`
 	Version string   `xml:"version,attr"`

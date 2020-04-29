@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	crawler "github.com/Genesis-Palace/go-scrapy/scrapy"
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -15,7 +16,7 @@ func TestNewMap(t *testing.T) {
 		}(i)
 	}
 	time.Sleep(time.Second)
-	fmt.Println(m.Size())
+	t.Log(m.Size())
 }
 
 func TestNewList(t *testing.T) {
@@ -26,7 +27,7 @@ func TestNewList(t *testing.T) {
 		}(i)
 	}
 	time.Sleep(time.Second)
-	fmt.Println(list.Size())
+	t.Log(list.Size())
 }
 
 func TestNewMapItem(t *testing.T) {
@@ -39,11 +40,12 @@ func TestNewMapItem(t *testing.T) {
 	list.Add(5)
 	list.Add(7)
 	item.Add(map[string]interface{}{"5": list.Items()})
-	fmt.Println(item.Dumps())
+	t.Log(item.Dumps())
 }
 
 func TestLoadOptions(t *testing.T) {
-	path := "../apps/config/test_list.yaml"
+	path := "../producer.yaml"
+	t.Log(filepath.Abs("."))
 	options, err := crawler.NewOptions(path)
 	if err != nil {
 		t.Error(err)
@@ -63,7 +65,7 @@ func TestStringItem(t *testing.T) {
 	if !has {
 		t.Error("tag-- is not in str")
 	}
-	fmt.Println(str.String(), str.Hash())
+	t.Log(str.String(), str.Hash())
 }
 
 func TestNewTasks(t *testing.T) {
@@ -118,6 +120,6 @@ func TestNewCrawler(t *testing.T) {
 		var item = crawler.NewMap()
 		c := crawler.NewCrawler(u, item)
 		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
-		fmt.Println(item.Items())
+		t.Log(item.Items())
 	}
 }
