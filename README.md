@@ -4,7 +4,7 @@
 -------
 ###项目结构
 - go-scrapy
-	- scrapy-internal
+	- scrapy-scrapy
 		- ItemInterface
 		- ParserInterface
 		- ClientInterface
@@ -48,8 +48,7 @@
 ```go
 import (
 	"fmt"
-	"github.com/Genesis-Palace/go-scrapy/scrapy"
-	internal "github.com/Genesis-Palace/go-scrapy/scrapy-internal"
+	scrapy "github.com/Genesis-Palace/go-scrapy/scrapy"
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"sync"
 )
@@ -59,23 +58,23 @@ var (
 )
 
 func main(){
-	var url internal.String
+	var url scrapy.String
 	url = "https://www.toutiao.com/i6790992050591367684"
 	// go-scrapy内定义了多种item类型, 如需扩展, 完成接口定义即可
-	// 详见 scrapy-internal中的ItemInterfaceI接口
-	var item = internal.NewMap()
-	scrapy.NewCrawler(url, item).SetParser(internal.NewMixdParser(internal.Pattern{
-		"title": internal.G("head title"),
-		"source": internal.R(`source: '(.*?)'`),
-		"abstract": internal.R(`abstract: '(.*?)'`),
+	// 详见 scrapy中的ItemInterfaceI接口
+	var item = scrapy.NewMap()
+	scrapy.NewCrawler(url, item).SetParser(scrapy.NewMixdParser(.Pattern{
+		"title": scrapy.G("head title"),
+		"source": scrapy.R(`source: '(.*?)'`),
+		"abstract": scrapy.R(`abstract: '(.*?)'`),
 	})).SetTimeOut(1).Do()
 	/* 
 		parser支持3种方式, goquery解析, regex正则解析以及goquery和正则混合解析的方式.
-		* internal.G 使用goquery解析
+		* scrapy.G 使用goquery解析
 			* type: string
-		* internal.R 使用正则解析
+		* scrapy.R 使用正则解析
 			* type string
-		* internal.Pattern 混合类型
+		* scrapy.Pattern 混合类型
 			* type map[string]interface{}
 		parser提供接口, 如需扩展, 完成接口实现即可.
 	*/
@@ -87,10 +86,10 @@ func main(){
 // 代理设置方法
 func example3(){
 	// 目前代理只支持阿布云. 没有提供client的相关接口
-	var item = internal.NewMap()
-	var proxy = internal.NewAbutunProxy("appid", "secret", "proxyserver")
-	var parser = internal.NewGoQueryParser("head title")
-	var url internal.String = "https://www.toutiao.com/i6790992050591367684"
+	var item = scrapy.NewMap()
+	var proxy = scrapy.NewAbutunProxy("appid", "secret", "proxyserver")
+	var parser = scrapy.NewGoQueryParser("head title")
+	var url scrapy.String = "https://www.toutiao.com/i6790992050591367684"
 	scrapy.NewProxyCrawler(url, proxy, item).SetParser(parser).SetTimeOut(1).Do()
 	fmt.Println(item.Items())
 }

@@ -15,9 +15,6 @@ import (
 	"time"
 )
 
-var (
-	log = go_utils.Log()
-)
 
 const (
 	timeFormat = "2006-01-02 15:04:05"
