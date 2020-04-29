@@ -13,6 +13,7 @@ type Crawler struct {
 	Cb      func(i ItemInterfaceI)
 	Parser  ParserInterfaceI `validate:"required"`
 	Item    ItemInterfaceI   `validate:"required"`
+	html    String
 	sync.RWMutex
 }
 
@@ -27,21 +28,27 @@ func (t *Crawler) SetPipelines(cb func(i ItemInterfaceI)) {
 	t.Cb = cb
 }
 
-func (t *Crawler) Do() {
+func (t *Crawler) Html() String {
+	return t.html
+}
+
+func (t *Crawler) Do() *Crawler {
 	if err := t.Validate(); err != nil {
 		log.Error(err)
-		return
+		return t
 	}
 	res, err := t.Request.Do()
 	if err != nil {
 		log.Error(err)
-		return
+		return t
 	}
-	t.Parser.Parser(String(AutoGetHtmlEncode(res.Text())), t.Item)
+	t.html = String(AutoGetHtmlEncode(res.Text()))
+	t.Parser.Parser(t.html, t.Item)
 	if t.Cb == nil {
 		t.Cb = DefaultPipelines
 	}
 	t.Cb(t.Item)
+	return t
 }
 
 func (t *Crawler) SetHeader(header requests.Header) *Crawler {

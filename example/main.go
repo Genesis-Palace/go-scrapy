@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"github.com/Genesis-Palace/go-scrapy/scrapy"
 	go_utils "github.com/Genesis-Palace/go-utils"
+	"github.com/nsqio/go-nsq"
 )
 
 var (
 	log = go_utils.Log()
-	broker = scrapy.NewRedisBroker("127.0.0.1:6379", "", "test-redis-topic", 0)
+	broker = scrapy.NewRedisBroker("127.0.0.1:6379", "", "test-redis-broker", 0)
 )
 
 // 代理设置方法
@@ -35,6 +36,7 @@ func BrokerDemo(){
 		log.Error(errors.New("item is empty."))
 		return
 	}
+	log.Info(item)
 	broker.Add(item)
 	/*
 	127.0.0.1:6379> lpop test-redis-topic
@@ -76,15 +78,45 @@ func ReadYamlFileCreatedCrawler(){
 	}
 }
 
+type Handler struct{}
+func (h *Handler) HandleMessage(msg *nsq.Message) error{
+	s := scrapy.String(msg.Body)
+	log.Info(s.Hash())
+	return nil
+}
 
+func ConsumerOptionsCreated(){
+	go_utils.SetLogLevel("DEBUG")
+	opt, err := scrapy.NewOptions("producer.yaml")
+	if err != nil{
+		panic(err)
+	}
+	/*
+	consumer:
+		通过nsq.Handler接口, 实现handler接收消费数据并进行处理的逻辑.
+		default.Handler scrapy中有自己的默认配置, 建议在爬虫业务中, 契合自己的业务来实现对应的handler
+	 */
+	scrapy.NewRedisConsumer(opt.Consumer).SetHandler(&Handler{}).Run()
+}
 
+func GetHtml(){
+	var item = scrapy.NewMap()
+	var parser = scrapy.NewGoQueryParser("head title")
+	var url scrapy.String = "https://www.toutiao.com/i6790992050591367684"
+	var crawler = scrapy.NewCrawler(url, item).SetParser(parser).Do()
+	log.Info(crawler.Html())
+}
 
 
 
 func main(){
 	// 把采集结果放入redis队列中, 使用自带redis-broker方法
-	// BrokerDemo()
+	BrokerDemo()
 
 	// 通过读取yaml文件生成crawler需要的options
 	ReadYamlFileCreatedCrawler()
+	//ConsumerOptionsCreated()
+
+	// 如果需要原始的html 可以通过以下方式来获取
+	GetHtml()
 }

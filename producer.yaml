@@ -18,8 +18,8 @@ broker:
   redis:
     host: 127.0.0.1:6379
     db: 0
-    password: 1234abcd
-    topic: test-redis-broker
+    password: ""
+    topic: test-redis-topic
 
 #  nsq:
 #    urls:
@@ -42,3 +42,19 @@ pages:
           pub_time: "#news-time"
           inner_source: "#user-info h4"
           read_count: ".user-num > dd:nth-child(2) > span:nth-child(1) > em"
+
+
+consumer:
+#  nsq:
+#    urls:
+#      - 127.0.0.1:4150
+#    topic: test-consumer-topic
+#    channel: nsq-consumer
+
+  redis:
+    host: 127.0.0.1:6379
+    db: 0
+    password: ""
+    topic: test-redis-broker
+
+  limit: 20

@@ -71,7 +71,6 @@ func (n *nsqConsumer) HandleMessage(msg *nsq.Message) (err error) {
 }
 
 type RedisConsumer struct {
-	ch       chan String
 	Host     string
 	Password string
 	Db       int
@@ -93,11 +92,12 @@ func (r *RedisConsumer) SetHandler(handler nsq.Handler) ConsumerInterfaceI {
 }
 
 func (r *RedisConsumer) HandleMessage(msg *nsq.Message) (err error) {
+	log.Debug(String(msg.Body))
 	return
 }
 
 func (r *RedisConsumer) Run() {
-	if r.f.HandleMessage == nil {
+	if r.f == nil {
 		r.SetHandler(r)
 	}
 	for {
