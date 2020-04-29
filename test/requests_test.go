@@ -1,7 +1,7 @@
 package test
 
 import (
-	internal "github.com/Genesis-Palace/go-scrapy/scrapy-internal"
+	"github.com/Genesis-Palace/go-scrapy/scrapy"
 	"github.com/Genesis-Palace/requests"
 	"testing"
 	"time"
@@ -10,8 +10,8 @@ import (
 func TestNewRequest(t *testing.T) {
 	for i := 0; i <= 5; i++ {
 		go func() {
-			var url internal.String = "http://httpbin.org/headers"
-			req := internal.NewRequest(url)
+			var url scrapy.String = "http://httpbin.org/headers"
+			req := scrapy.NewRequest(url)
 			req.SetHeader(requests.Header{
 				"Host":       "www.abuyun.com",
 				"Referer":    "https://www.abuyun.com/http-proxy/dyn-manual.html",
@@ -28,8 +28,8 @@ func TestNewRequest(t *testing.T) {
 }
 
 func TestNewProxyRequest(t *testing.T) {
-	var url internal.String = "http://httpbin.org/ip"
-	req := internal.NewRequest(url, internal.Use)
+	var url scrapy.String = "http://httpbin.org/ip"
+	req := scrapy.NewRequest(url, scrapy.Use)
 	resp, err := req.Do()
 	if err != nil {
 		t.Error(err)
@@ -38,8 +38,8 @@ func TestNewProxyRequest(t *testing.T) {
 }
 
 func TestNewRequestPost(t *testing.T) {
-	var url internal.String = "http://httpbin.org/post"
-	var body = internal.NewMap()
+	var url scrapy.String = "http://httpbin.org/post"
+	var body = scrapy.NewMap()
 	var item = make(map[string]interface{})
 	item["a"] = 1
 	item["b"] = 2
@@ -49,8 +49,8 @@ func TestNewRequestPost(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	req := internal.NewRequest(url)
-	resp, err := req.SetMethod(internal.POSTJSON).Json(js).SetTimeOut(5).Do()
+	req := scrapy.NewRequest(url)
+	resp, err := req.SetMethod(scrapy.POSTJSON).Json(js).SetTimeOut(5).Do()
 	if err != nil {
 		t.Error(err)
 	}
@@ -58,8 +58,8 @@ func TestNewRequestPost(t *testing.T) {
 }
 
 func TestNewRequestArgs(t *testing.T) {
-	var url internal.String = "http://httpbin.org/ip"
-	req := internal.NewRequest(
+	var url scrapy.String = "http://httpbin.org/ip"
+	req := scrapy.NewRequest(
 		url,
 		requests.Header{
 			"Host":       "www.abuyun.com",
@@ -67,7 +67,7 @@ func TestNewRequestArgs(t *testing.T) {
 			"Referer":    "https://www.abuyun.com/http-proxy/dyn-manual.html",
 			"User-Agent": "Mozilla/5.0 (Macintosh; Intel …) Gecko/20100101 Firefox/75.0",
 		},
-		internal.Use,
+		scrapy.Use,
 		time.Duration(3)*time.Second,
 	)
 	resp, err := req.Do()

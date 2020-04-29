@@ -1,4 +1,4 @@
-package scrapy_internal
+package scrapy
 
 func DefaultPipelines(i ItemInterfaceI) {
 	if d, e := i.Dumps(); e == nil {

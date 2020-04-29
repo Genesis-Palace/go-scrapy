@@ -3,13 +3,12 @@ package test
 import (
 	"fmt"
 	crawler "github.com/Genesis-Palace/go-scrapy/scrapy"
-	internal "github.com/Genesis-Palace/go-scrapy/scrapy-internal"
 	"testing"
 	"time"
 )
 
 func TestNewMap(t *testing.T) {
-	var m = internal.NewMap()
+	var m = crawler.NewMap()
 	for i := 0; i < 50; i++ {
 		go func(i int) {
 			m.Add(map[string]interface{}{string(i): i})
@@ -20,7 +19,7 @@ func TestNewMap(t *testing.T) {
 }
 
 func TestNewList(t *testing.T) {
-	var list = internal.NewList()
+	var list = crawler.NewList()
 	for i := 0; i < 50; i++ {
 		go func(i int) {
 			list.Add(i)
@@ -31,8 +30,8 @@ func TestNewList(t *testing.T) {
 }
 
 func TestNewMapItem(t *testing.T) {
-	var item = internal.NewMap()
-	var list = internal.NewList()
+	var item = crawler.NewMap()
+	var list = crawler.NewList()
 	item.Add(map[string]interface{}{"1": 2})
 	item.Add(map[string]interface{}{"3": "3"})
 	list.Add(1)
@@ -53,7 +52,7 @@ func TestLoadOptions(t *testing.T) {
 }
 
 func TestStringItem(t *testing.T) {
-	var str internal.String
+	var str crawler.String
 	empty := str.Empty()
 	if !empty {
 		t.Error("str len errors. str is not empty")
@@ -68,23 +67,23 @@ func TestStringItem(t *testing.T) {
 }
 
 func TestNewTasks(t *testing.T) {
-	var urls = []internal.String{
+	var urls = []crawler.String{
 		"https://www.toutiao.com/a6817599019259265539/",
 		"https://www.toutiao.com/a6819580497153229320/",
 		"https://www.toutiao.com/a6817772303032517128/",
 		//"http://www.toutiaonews.com/",
 	}
 	for _, url := range urls {
-		go func(url internal.String) {
-			var item = internal.NewMap()
-			item.Add(internal.NewPr("url", url))
-			item.Add(internal.NewPr("ts", time.Now().Unix()))
-			var parser = internal.NewMixdParser(internal.Pattern{
-				"title":     internal.G("head title"),
-				"tag":       internal.R(`chineseTag: '(.*?)'`),
-				"group_id":  internal.R(`groupId: '(.*?)'`),
-				"publisher": internal.R(`name: '(.*?)'`),
-				"uid":       internal.R(`uid: '(.*?)'`),
+		go func(url crawler.String) {
+			var item = crawler.NewMap()
+			item.Add(crawler.NewPr("url", url))
+			item.Add(crawler.NewPr("ts", time.Now().Unix()))
+			var parser = crawler.NewMixdParser(crawler.Pattern{
+				"title":     crawler.G("head title"),
+				"tag":       crawler.R(`chineseTag: '(.*?)'`),
+				"group_id":  crawler.R(`groupId: '(.*?)'`),
+				"publisher": crawler.R(`name: '(.*?)'`),
+				"uid":       crawler.R(`uid: '(.*?)'`),
 			})
 			task := crawler.NewCrawler(url, item)
 			task.SetTimeOut(3).SetParser(parser).Do()
@@ -94,11 +93,11 @@ func TestNewTasks(t *testing.T) {
 }
 
 func TestNewCrawler(t *testing.T) {
-	var uc = make(chan internal.String, 100)
+	var uc = make(chan crawler.String, 100)
 	go func() {
-		var url = internal.String("http://www.toutiaonews.com")
-		var parser = internal.NewGoQueryParser(".newsList li dl dt a")
-		var item = internal.NewMap()
+		var url = crawler.String("http://www.toutiaonews.com")
+		var parser = crawler.NewGoQueryParser(".newsList li dl dt a")
+		var item = crawler.NewMap()
 		c := crawler.NewCrawler(url, item)
 		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
 		host, _ := crawler.Url(url).Host()
@@ -106,17 +105,17 @@ func TestNewCrawler(t *testing.T) {
 			if _, err := crawler.Host(v.(string)); err != nil {
 				continue
 			}
-			uc <- internal.String(fmt.Sprintf("http://%s/%s", host, v))
+			uc <- crawler.String(fmt.Sprintf("http://%s/%s", host, v))
 		}
 		close(uc)
 	}()
 	for u := range uc {
-		var parser = internal.NewMixdParser(internal.Pattern{
-			"title":     internal.G(".article-body h1"),
-			"date":      internal.R(`时间：([0-9].*[0-9])`),
-			"recommend": internal.G(".related-recul li a"),
+		var parser = crawler.NewMixdParser(crawler.Pattern{
+			"title":     crawler.G(".article-body h1"),
+			"date":      crawler.R(`时间：([0-9].*[0-9])`),
+			"recommend": crawler.G(".related-recul li a"),
 		})
-		var item = internal.NewMap()
+		var item = crawler.NewMap()
 		c := crawler.NewCrawler(u, item)
 		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
 		fmt.Println(item.Items())

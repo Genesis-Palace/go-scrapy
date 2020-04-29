@@ -1,4 +1,4 @@
-package scrapy_internal
+package scrapy
 
 import (
 	"encoding/xml"

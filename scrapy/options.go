@@ -2,7 +2,6 @@ package scrapy
 
 import (
 	"encoding/json"
-	"github.com/Genesis-Palace/go-scrapy/scrapy-internal"
 	"github.com/Genesis-Palace/go-utils"
 	"github.com/Genesis-Palace/requests"
 	"github.com/go-redis/redis"
@@ -26,7 +25,7 @@ const (
 
 type BrokerInterfaceI interface {
 	Init()
-	Add(item scrapy_internal.ItemInterfaceI) bool
+	Add(item ItemInterfaceI) bool
 }
 
 type Broker struct {
@@ -37,21 +36,21 @@ type Broker struct {
 }
 
 func (b *Broker) Init() {
-	if scrapy_internal.Validated(b.RedisBroker) {
+	if Validated(b.RedisBroker) {
 		b.RedisBroker.Init()
 		b.Rds = true
 	}
-	if scrapy_internal.Validated(b.NsqBroker) {
+	if Validated(b.NsqBroker) {
 		b.NsqBroker.Init()
 		b.Nsq = true
 	}
 }
 
-func (b *Broker) Add(item scrapy_internal.ItemInterfaceI) bool {
+func (b *Broker) Add(item ItemInterfaceI) bool {
 	switch true {
-	case scrapy_internal.Validated(b.RedisBroker):
+	case Validated(b.RedisBroker):
 		b.RedisBroker.Add(item)
-	case scrapy_internal.Validated(b.NsqBroker):
+	case Validated(b.NsqBroker):
 		b.NsqBroker.Add(item)
 	default:
 		return false
@@ -62,9 +61,9 @@ func (b *Broker) Add(item scrapy_internal.ItemInterfaceI) bool {
 func (b *Broker) GetBroker() BrokerInterfaceI {
 	var broker BrokerInterfaceI
 	switch true {
-	case scrapy_internal.Validated(b.RedisBroker):
+	case Validated(b.RedisBroker):
 		broker = b.RedisBroker
-	case scrapy_internal.Validated(b.NsqBroker):
+	case Validated(b.NsqBroker):
 		broker = b.NsqBroker
 	default:
 		broker = nil
@@ -72,7 +71,7 @@ func (b *Broker) GetBroker() BrokerInterfaceI {
 	return broker
 }
 
-type Url scrapy_internal.String
+type Url String
 
 func (u *Url) AddHttp() {
 	*u = Url("http://" + u.String())
@@ -141,13 +140,13 @@ func (n *Next) Load(m map[string]interface{}) error {
 	return nil
 }
 
-func (n *Next) MergeGr() (result scrapy_internal.Pattern) {
-	result = make(scrapy_internal.Pattern)
+func (n *Next) MergeGr() (result Pattern) {
+	result = make(Pattern)
 	for k, v := range n.G {
-		result[k] = scrapy_internal.G(v)
+		result[k] = G(v)
 	}
 	for k, v := range n.R {
-		result[k] = scrapy_internal.R(v)
+		result[k] = R(v)
 	}
 	return result
 }
@@ -157,10 +156,10 @@ type Pages struct {
 }
 
 type Page struct {
-	Next   *Next                  `json:"next-parser" yaml:"next-parser"`
-	Url    scrapy_internal.String `json:"url"`
-	Parser scrapy_internal.G      `json:"parser"`
-	Meta   map[string]string      `json:"meta"`
+	Next   *Next             `json:"next-parser" yaml:"next-parser"`
+	Url    String            `json:"url"`
+	Parser G                 `json:"parser"`
+	Meta   map[string]string `json:"meta"`
 }
 
 func (o *Options) Dumps() (string, error) {
@@ -211,7 +210,7 @@ func randomNsqUrl(v []string) interface{} {
 }
 
 func (n *NsqBroker) Init() {
-	scrapy_internal.Once(func() {
+	Once(func() {
 		n.c = requests.NewRequest()
 		log.Infof("nsqd broker inited. host: %s, topic: %s", n.getPushTopicUrl(), n.Topic)
 	})
@@ -224,7 +223,7 @@ func (n *NsqBroker) getPushTopicUrl() string {
 	return n.pushUrl
 }
 
-func (n *NsqBroker) Add(item scrapy_internal.ItemInterfaceI) bool {
+func (n *NsqBroker) Add(item ItemInterfaceI) bool {
 	doc, err := item.Dumps()
 	if err != nil {
 		time.Sleep(100 * time.Millisecond)
@@ -249,10 +248,10 @@ type RedisBroker struct {
 	Db       int    `json:"db"`
 	Topic    string `json:"topic" validate:"required"`
 	c        *redis.Client
-	scrapy_internal.WaitGroupWrap
+	WaitGroupWrap
 }
 
-func (r *RedisBroker) Add(item scrapy_internal.ItemInterfaceI) bool {
+func (r *RedisBroker) Add(item ItemInterfaceI) bool {
 	doc, _ := item.Dumps()
 	_, err := r.c.LPush(r.Topic, doc.String()).Result()
 	if err != nil {
@@ -262,19 +261,19 @@ func (r *RedisBroker) Add(item scrapy_internal.ItemInterfaceI) bool {
 }
 
 func (r *RedisBroker) Init() {
-	scrapy_internal.Once(func() {
+	Once(func() {
 		opt := go_utils.NewRedisConf(r.Host, r.Password, r.Db)
 		r.c = go_utils.NewRedis(opt)
 		log.Info("redis broker inited.")
 	})
 }
 
-func (o *Options) Item() (scrapy_internal.String, error) {
+func (o *Options) Item() (String, error) {
 	str, err := o.Dumps()
 	if err != nil {
 		return "", err
 	}
-	return scrapy_internal.String(str), nil
+	return String(str), nil
 }
 
 func NewOptions(path string) (*Options, error) {
