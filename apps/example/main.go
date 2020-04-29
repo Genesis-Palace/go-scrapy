@@ -6,6 +6,7 @@ import (
 	"github.com/Genesis-Palace/go-scrapy/scrapy"
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/nsqio/go-nsq"
+	"time"
 )
 
 var (
@@ -111,12 +112,21 @@ func GetHtml(){
 
 func main(){
 	// 把采集结果放入redis队列中, 使用自带redis-broker方法
-	BrokerDemo()
+	var wg scrapy.WaitGroupWrap
+	wg.Wrap(func(){
+		for i:=0; i<=5; i++{
+			go func(){
+				BrokerDemo()
+			}()
+			time.Sleep(time.Second)
+		}
+	})
 
 	// 通过读取yaml文件生成crawler需要的options
 	ReadYamlFileCreatedCrawler()
-	//ConsumerOptionsCreated()
+	wg.Wrap(ConsumerOptionsCreated)
 
 	// 如果需要原始的html 可以通过以下方式来获取
-	GetHtml()
+	//GetHtml()
+	wg.Wait()
 }
