@@ -125,6 +125,32 @@ type Consumer struct {
 	Limit int
 }
 
+func NewNext(arg ... interface{}) (*Next, error){
+	if len(arg) == 0{
+		return &Next{
+			G: make(map[string]string),
+			R: make(map[string]string),
+		}, nil
+	}
+	for _, a := range arg{
+		switch a.(type) {
+		case map[string]interface{}:
+			next := &Next{
+				G: make(map[string]string),
+				R: make(map[string]string),
+			}
+			err := next.Load(a.(map[string]interface{}))
+			if err != nil{
+				return nil, err
+			}
+			return next, nil
+		default:
+
+		}
+	}
+	panic("unreach")
+}
+
 type Next struct {
 	G map[string]string
 	R map[string]string

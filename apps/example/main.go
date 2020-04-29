@@ -67,8 +67,10 @@ func ReadYamlFileCreatedCrawler(){
 			var item = scrapy.NewMap()
 			var parser = scrapy.NewGoQueryParser(v.Parser)
 			item.Add(scrapy.NewPr("meta", v.Meta))
+			item.Add(scrapy.NewPr("next", v.Next))
 			scrapy.NewCrawler(v.Url, item).SetParser(parser).Do()
 			items <- item
+			broker.Add(item)
 		}(k, v)
 	}
 	wg.Wait()
@@ -81,8 +83,28 @@ func ReadYamlFileCreatedCrawler(){
 
 type Handler struct{}
 func (h *Handler) HandleMessage(msg *nsq.Message) error{
-	s := scrapy.String(msg.Body)
-	log.Info(s.Hash())
+	var item = scrapy.NewMap()
+	err := item.Load(msg.Body)
+	if err != nil{
+		panic(err)
+	}
+	var nextParser scrapy.Pattern
+	if v := item.Get("next"); v !=nil{
+		next, err := scrapy.NewNext(v)
+		if err != nil{
+			log.Error(err)
+			return err
+		}
+		nextParser = next.MergeGr()
+	}
+	var hrefs = item.Get("href")
+	if hrefs == nil{
+		return errors.New("next hrefs is empty")
+	}
+	for _, url := range hrefs.([]interface{}){
+		var detail = scrapy.NewMap()
+		scrapy.NewCrawler(scrapy.String(url.(string)), detail).SetParser(scrapy.NewMixdParser(nextParser)).Do()
+	}
 	return nil
 }
 
@@ -124,6 +146,8 @@ func main(){
 
 	// 通过读取yaml文件生成crawler需要的options
 	ReadYamlFileCreatedCrawler()
+	// 读取 ReadYamlFileCreatedCrawler 写入管道中的信息, 通过HandlerMessage方法进行消息处理.
+	// 实现多端分布式逻辑
 	wg.Wrap(ConsumerOptionsCreated)
 
 	// 如果需要原始的html 可以通过以下方式来获取
