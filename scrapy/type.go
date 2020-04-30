@@ -142,6 +142,14 @@ func (l *List) Items() []interface{} {
 	return l.l
 }
 
+func (l *List) Load(b []byte) error {
+	err := json.Unmarshal(b, &l.l)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (l *List) Empty() bool {
 	return l.Size() == 0
 }

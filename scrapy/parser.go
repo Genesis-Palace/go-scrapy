@@ -1,6 +1,7 @@
 package scrapy
 
 import (
+	"encoding/json"
 	"fmt"
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/PuerkitoBio/goquery"
@@ -58,7 +59,7 @@ type GoQueryParser struct {
 }
 
 func (g *GoQueryParser) Parser(html String, item ItemInterfaceI, sss ...string) (ItemInterfaceI, bool) {
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html.String()))
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(AutoGetHtmlEncode(html.String())))
 	if err != nil {
 		log.Error(err)
 		return item, false
@@ -93,9 +94,32 @@ func NewGoQueryParser(pattern G) *GoQueryParser {
 	}
 }
 
+type JsonParser struct{
+	DefaultParser
+	Html    string
+	pattern String
+}
+
+func (r *JsonParser) Parser(htm String, interfaceI ItemInterfaceI, s ...string) (i ItemInterfaceI, ret bool) {
+	var res = make(map[string]interface{})
+	err := json.Unmarshal(htm.Decode(), &res)
+	if err != nil{
+		log.Warning("json parser unmarshal json error.")
+		return
+	}
+	interfaceI.Add(res)
+	ret = true
+	return
+}
+
+
+func NewJsonParser() *JsonParser{
+	return &JsonParser{
+	}
+}
+
 type MixedParser struct {
 	pattern Pattern
-	result  *Map
 	DefaultParser
 }
 
@@ -130,8 +154,7 @@ type RegexParser struct {
 
 func (r *RegexParser) Parser(htm String, interfaceI ItemInterfaceI, s ...string) (i ItemInterfaceI, ret bool) {
 	key := newKey(htm, s...)
-	r.Html = htm.String()
-	var result = Regex(r.Html, r.Pattern.String())
+	var result = Regex(AutoGetHtmlEncode(htm.String()), r.Pattern.String())
 	if len(result) == 0 {
 		return
 	}

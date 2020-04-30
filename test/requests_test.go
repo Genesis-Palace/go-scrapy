@@ -67,7 +67,6 @@ func TestNewRequestArgs(t *testing.T) {
 			"Referer":    "https://www.abuyun.com/http-proxy/dyn-manual.html",
 			"User-Agent": "Mozilla/5.0 (Macintosh; Intel …) Gecko/20100101 Firefox/75.0",
 		},
-		scrapy.Use,
 		time.Duration(3)*time.Second,
 	)
 	resp, err := req.Do()

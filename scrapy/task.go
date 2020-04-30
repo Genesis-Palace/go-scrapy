@@ -39,10 +39,9 @@ func (t *Crawler) Do() *Crawler {
 	}
 	res, err := t.Request.Do()
 	if err != nil {
-		log.Error(err)
 		return t
 	}
-	t.html = String(AutoGetHtmlEncode(res.Text()))
+	t.html = String(res.Text())
 	t.Parser.Parser(t.html, t.Item)
 	if t.Cb == nil {
 		t.Cb = DefaultPipelines

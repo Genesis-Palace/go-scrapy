@@ -133,7 +133,7 @@ func GetHtml(){
 
 
 func main(){
-	// 把采集结果放入redis队列中, 使用自带redis-broker方法
+	//把采集结果放入redis队列中, 使用自带redis-broker方法
 	var wg scrapy.WaitGroupWrap
 	wg.Wrap(func(){
 		for i:=0; i<=5; i++{
@@ -144,13 +144,36 @@ func main(){
 		}
 	})
 
-	// 通过读取yaml文件生成crawler需要的options
+	//通过读取yaml文件生成crawler需要的options
 	ReadYamlFileCreatedCrawler()
-	// 读取 ReadYamlFileCreatedCrawler 写入管道中的信息, 通过HandlerMessage方法进行消息处理.
-	// 实现多端分布式逻辑
+	//读取 ReadYamlFileCreatedCrawler 写入管道中的信息, 通过HandlerMessage方法进行消息处理.
+	//实现多端分布式逻辑
 	wg.Wrap(ConsumerOptionsCreated)
 
-	// 如果需要原始的html 可以通过以下方式来获取
-	//GetHtml()
+	//如果需要原始的html 可以通过以下方式来获取
+	GetHtml()
 	wg.Wait()
+	// 增加jsonparser基础实现, 将response.Html转成map 并写入item中. 解析由开发者自定义即可
+	NewToutiaoCrawlerJsonParser()
+	NewSoHuNewsJsonParser()
+}
+
+
+func NewToutiaoCrawlerJsonParser(){
+	// 打开debug log
+	go_utils.SetLogLevel("DEBUG")
+	var url scrapy.String = "https://www.toutiao.com/article/v2/tab_comments/?aid=24&app_name=toutiao-web&group_id=6821094670118945293&item_id=6821094670118945293&offset=0&count=5"
+	var item = scrapy.NewMap()
+	scrapy.NewCrawler(url, item).SetParser(scrapy.NewJsonParser()).Do().Html()
+	log.Info(item)
+}
+
+func NewSoHuNewsJsonParser(){
+	//go_utils.SetLogLevel("DEBUG")
+	var url scrapy.String = "https://apiv2.sohu.com/api/topic/load?callback=&page_size=10&topic_source_id=mp_392096309&page_no=1&hot_size=5&media_id=267106&topic_category_id=8&topic_title=%E4%B8%AD%E5%85%B1%E4%B8%AD%E5%A4%AE%E6%94%BF%E6%B2%BB%E5%B1%80%E5%B8%B8%E5%8A%A1%E5%A7%94%E5%91%98%E4%BC%9A%E5%8F%AC%E5%BC%80%E4%BC%9A%E8%AE%AE%E4%B9%A0%E8%BF%91%E5%B9%B3%E4%B8%BB%E6%8C%81&topic_url=https%3A%2F%2Fwww.sohu.com%2Fa%2F392096309_267106%3Fcode%3D59d2c479cc76988d098d8b3251ed61c4&source_id=mp_392096309&_=1588211540064"
+	var item = scrapy.NewMap()
+	scrapy.NewCrawler(url, item).SetParser(scrapy.NewJsonParser()).Do().Html()
+	for key, value := range item.Get("jsonObject").(map[string]interface{}){
+		log.Info(key, value)
+	}
 }

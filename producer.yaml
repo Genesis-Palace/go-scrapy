@@ -41,7 +41,6 @@ pages:
           title: .text-title h1
           pub_time: "#news-time"
           inner_source: "#user-info h4"
-          read_count: ".user-num > dd:nth-child(2) > span:nth-child(1) > em"
 
 
 consumer:
