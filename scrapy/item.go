@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"io/ioutil"
 	"sync"
+	"time"
 )
 
 type ItemInterfaceI interface {
@@ -33,6 +34,7 @@ func (f *Feeds) Add(v interface{}) {
 			Description: desc,
 		}
 		f.Channel.AddItem(x)
+		f.Channel.LastBuildDate = time.Now().Format(timeFormat)
 	}
 }
 
