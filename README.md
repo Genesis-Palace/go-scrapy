@@ -63,7 +63,7 @@ func main(){
 	// go-scrapy内定义了多种item类型, 如需扩展, 完成接口定义即可
 	// 详见 scrapy中的ItemInterfaceI接口
 	var item = scrapy.NewMap()
-	scrapy.NewCrawler(url, item).SetParser(scrapy.NewMixdParser(.Pattern{
+	scrapy.NewCrawler(url, item).SetParser(scrapy.NewMixdParser(scrapy.Pattern{
 		"title": scrapy.G("head title"),
 		"source": scrapy.R(`source: '(.*?)'`),
 		"abstract": scrapy.R(`abstract: '(.*?)'`),
