@@ -86,13 +86,12 @@ func (h *Handler) HandleMessage(msg *nsq.Message) error{
 	var item = scrapy.NewMap()
 	err := item.Load(msg.Body)
 	if err != nil{
-		panic(err)
+		return err
 	}
 	var nextParser scrapy.Pattern
 	if v := item.Get("next"); v !=nil{
 		next, err := scrapy.NewNext(v)
 		if err != nil{
-			log.Error(err)
 			return err
 		}
 		nextParser = next.MergeGr()
