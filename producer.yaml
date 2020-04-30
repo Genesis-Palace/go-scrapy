@@ -41,6 +41,8 @@ pages:
           title: .text-title h1
           pub_time: "#news-time"
           inner_source: "#user-info h4"
+        r:
+          description: 'name="description\" content="(.*?)"'
 
 
 consumer:

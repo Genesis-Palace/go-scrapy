@@ -81,12 +81,18 @@ func (t *Crawler) SetCookies(cookie *http.Cookie) *Crawler {
 	return t
 }
 
-func NewCrawler(url String, item ItemInterfaceI) *Crawler {
-	item.Add(NewPr("url", url))
-	return &Crawler{
+func NewCrawler(url String, args ...interface{}) *Crawler {
+	c := &Crawler{
 		Request: NewRequest(url),
-		Item:    item,
 	}
+	for _, arg := range args{
+		switch arg.(type) {
+		case ItemInterfaceI:
+			c.Item = arg.(ItemInterfaceI)
+		}
+	}
+	c.Item.Add(NewPr("url", url))
+	return c
 }
 
 func NewProxyCrawler(url String, proxy *AbuyunProxy, item ItemInterfaceI) *Crawler {

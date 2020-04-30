@@ -6,7 +6,6 @@ import (
 	"github.com/Genesis-Palace/go-scrapy/scrapy"
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/nsqio/go-nsq"
-	"time"
 )
 
 var (
@@ -101,10 +100,20 @@ func (h *Handler) HandleMessage(msg *nsq.Message) error{
 	if hrefs == nil{
 		return errors.New("next hrefs is empty")
 	}
+	// 创建rss item
+	var feeds = scrapy.NewFeeds()
 	for _, url := range hrefs.([]interface{}){
 		var detail = scrapy.NewMap()
 		scrapy.NewCrawler(scrapy.String(url.(string)), detail).SetParser(scrapy.NewMixdParser(nextParser)).Do()
+		// 把detail放入feeds结构中
+		feeds.Add(detail)
 	}
+	// feeds dumps落地当前结构中的生成的xml, 提供给service使用
+	s, err := feeds.Dumps()
+	if err != nil{
+		return err
+	}
+	log.Info(s.String())
 	return nil
 }
 
@@ -131,18 +140,17 @@ func GetHtml(){
 }
 
 
-
 func main(){
 	//把采集结果放入redis队列中, 使用自带redis-broker方法
 	var wg scrapy.WaitGroupWrap
-	wg.Wrap(func(){
-		for i:=0; i<=5; i++{
-			go func(){
-				BrokerDemo()
-			}()
-			time.Sleep(time.Second)
-		}
-	})
+	//wg.Wrap(func(){
+	//	for i:=0; i<=5; i++{
+	//		go func(){
+	//			BrokerDemo()
+	//		}()
+	//		time.Sleep(time.Second)
+	//	}
+	//})
 
 	//通过读取yaml文件生成crawler需要的options
 	ReadYamlFileCreatedCrawler()
@@ -151,11 +159,11 @@ func main(){
 	wg.Wrap(ConsumerOptionsCreated)
 
 	//如果需要原始的html 可以通过以下方式来获取
-	GetHtml()
+	//GetHtml()
 	wg.Wait()
 	// 增加jsonparser基础实现, 将response.Html转成map 并写入item中. 解析由开发者自定义即可
-	NewToutiaoCrawlerJsonParser()
-	NewSoHuNewsJsonParser()
+	//NewToutiaoCrawlerJsonParser()
+	//NewSoHuNewsJsonParser()
 }
 
 
