@@ -6,7 +6,6 @@ import (
 	"github.com/Genesis-Palace/go-scrapy/scrapy"
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/nsqio/go-nsq"
-	"time"
 )
 
 var (
@@ -142,28 +141,28 @@ func GetHtml(){
 
 func main(){
 	//把采集结果放入redis队列中, 使用自带redis-broker方法
-	var wg scrapy.WaitGroupWrap
-	wg.Wrap(func(){
-		for i:=0; i<=5; i++{
-			go func(){
-				BrokerDemo()
-			}()
-			time.Sleep(time.Second)
-		}
-	})
-
-	//通过读取yaml文件生成crawler需要的options
-	ReadYamlFileCreatedCrawler()
-	//读取 ReadYamlFileCreatedCrawler 写入管道中的信息, 通过HandlerMessage方法进行消息处理.
-	//实现多端分布式逻辑
-	wg.Wrap(ConsumerOptionsCreated)
-
-	//如果需要原始的html 可以通过以下方式来获取
-	GetHtml()
-	wg.Wait()
-	// 增加jsonparser基础实现, 将response.Html转成map 并写入item中. 解析由开发者自定义即可
-	NewToutiaoCrawlerJsonParser()
-	NewSoHuNewsJsonParser()
+	//var wg scrapy.WaitGroupWrap
+	//wg.Wrap(func(){
+	//	for i:=0; i<=5; i++{
+	//		go func(){
+	//			BrokerDemo()
+	//		}()
+	//		time.Sleep(time.Second)
+	//	}
+	//})
+	//
+	////通过读取yaml文件生成crawler需要的options
+	//ReadYamlFileCreatedCrawler()
+	////读取 ReadYamlFileCreatedCrawler 写入管道中的信息, 通过HandlerMessage方法进行消息处理.
+	////实现多端分布式逻辑
+	//wg.Wrap(ConsumerOptionsCreated)
+	//
+	////如果需要原始的html 可以通过以下方式来获取
+	//GetHtml()
+	//wg.Wait()
+	//// 增加jsonparser基础实现, 将response.Html转成map 并写入item中. 解析由开发者自定义即可
+	//NewToutiaoCrawlerJsonParser()
+	//NewSoHuNewsJsonParser()
 }
 
 
@@ -185,3 +184,4 @@ func NewSoHuNewsJsonParser(){
 		log.Info(key, value)
 	}
 }
+

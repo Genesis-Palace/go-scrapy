@@ -97,7 +97,7 @@ func NewCrawler(url String, args ...interface{}) *Crawler {
 
 func NewProxyCrawler(url String, proxy *AbuyunProxy, item ItemInterfaceI) *Crawler {
 	return &Crawler{
-		Request: NewRequest(url, Use, proxy),
+		Request: NewRequest(url, proxy),
 		Item:    item,
 	}
 }

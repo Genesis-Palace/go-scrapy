@@ -73,7 +73,8 @@ func (g *GoQueryParser) Parser(html String, item ItemInterfaceI, sss ...string) 
 			href.Add(h)
 		} else {
 			key := newKey(html, sss...)
-			pr := NewPr(key, strings.TrimSpace(selection.Text()))
+			h, _ := selection.Html()
+			pr := NewPr(key, strings.TrimSpace(h))
 			item.Add(pr)
 		}
 	})
@@ -114,8 +115,7 @@ func (r *JsonParser) Parser(htm String, interfaceI ItemInterfaceI, s ...string) 
 
 
 func NewJsonParser() *JsonParser{
-	return &JsonParser{
-	}
+	return &JsonParser{}
 }
 
 type MixedParser struct {

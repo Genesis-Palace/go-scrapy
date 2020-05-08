@@ -27,15 +27,16 @@ func TestNewRequest(t *testing.T) {
 	time.Sleep(time.Second)
 }
 
-func TestNewProxyRequest(t *testing.T) {
-	var url scrapy.String = "http://httpbin.org/ip"
-	req := scrapy.NewRequest(url, scrapy.Use)
-	resp, err := req.Do()
-	if err != nil {
-		t.Error(err)
-	}
-	t.Log(resp.Text())
-}
+//func TestNewProxyRequest(t *testing.T) {
+//	var url scrapy.String = "http://httpbin.org/ip"
+//	var abuyun = scrapy.NewAbutunProxy("111","222","333")
+//	req := scrapy.NewRequest(url, abuyun)
+//	resp, err := req.Do()
+//	if err != nil {
+//		t.Error(err)
+//	}
+//	t.Log(resp.Text())
+//}
 
 func TestNewRequestPost(t *testing.T) {
 	var url scrapy.String = "http://httpbin.org/post"
@@ -58,7 +59,7 @@ func TestNewRequestPost(t *testing.T) {
 }
 
 func TestNewRequestArgs(t *testing.T) {
-	var url scrapy.String = "http://httpbin.org/ip"
+	var url scrapy.String = "http://www.httpbin.org/headers"
 	req := scrapy.NewRequest(
 		url,
 		requests.Header{

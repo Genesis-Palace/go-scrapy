@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	crawler "github.com/Genesis-Palace/go-scrapy/scrapy"
 	"path/filepath"
 	"testing"
@@ -94,32 +93,32 @@ func TestNewTasks(t *testing.T) {
 	time.Sleep(time.Second)
 }
 
-func TestNewCrawler(t *testing.T) {
-	var uc = make(chan crawler.String, 100)
-	go func() {
-		var url = crawler.String("http://www.toutiaonews.com")
-		var parser = crawler.NewGoQueryParser(".newsList li dl dt a")
-		var item = crawler.NewMap()
-		c := crawler.NewCrawler(url, item)
-		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
-		host, _ := crawler.Url(url).Host()
-		for _, v := range item.Items()["href"].([]interface{}) {
-			if _, err := crawler.Host(v.(string)); err != nil {
-				continue
-			}
-			uc <- crawler.String(fmt.Sprintf("http://%s/%s", host, v))
-		}
-		close(uc)
-	}()
-	for u := range uc {
-		var parser = crawler.NewMixdParser(crawler.Pattern{
-			"title":     crawler.G(".article-body h1"),
-			"date":      crawler.R(`时间：([0-9].*[0-9])`),
-			"recommend": crawler.G(".related-recul li a"),
-		})
-		var item = crawler.NewMap()
-		c := crawler.NewCrawler(u, item)
-		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
-		t.Log(item.Items())
-	}
-}
+//func TestNewCrawler(t *testing.T) {
+//	var uc = make(chan crawler.String, 100)
+//	go func() {
+//		var url = crawler.String("http://www.toutiaonews.com")
+//		var parser = crawler.NewGoQueryParser(".newsList li dl dt a")
+//		var item = crawler.NewMap()
+//		c := crawler.NewCrawler(url, item)
+//		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
+//		host, _ := crawler.Url(url).Host()
+//		for _, v := range item.Items()["href"].([]interface{}) {
+//			if _, err := crawler.Host(v.(string)); err != nil {
+//				continue
+//			}
+//			uc <- crawler.String(fmt.Sprintf("http://%s/%s", host, v))
+//		}
+//		close(uc)
+//	}()
+//	for u := range uc {
+//		var parser = crawler.NewMixdParser(crawler.Pattern{
+//			"title":     crawler.G(".article-body h1"),
+//			"date":      crawler.R(`时间：([0-9].*[0-9])`),
+//			"recommend": crawler.G(".related-recul li a"),
+//		})
+//		var item = crawler.NewMap()
+//		c := crawler.NewCrawler(u, item)
+//		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
+//		t.Log(item.Items())
+//	}
+//}

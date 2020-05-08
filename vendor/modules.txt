@@ -1,0 +1,52 @@
+# github.com/Genesis-Palace/go-utils v0.0.0-20191101040653-b394ebcfd0aa
+github.com/Genesis-Palace/go-utils
+# github.com/Genesis-Palace/requests v0.0.0-20191011101224-852e65f16285
+github.com/Genesis-Palace/requests
+# github.com/PuerkitoBio/goquery v1.5.1
+github.com/PuerkitoBio/goquery
+# github.com/andybalholm/cascadia v1.1.0
+github.com/andybalholm/cascadia
+# github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
+github.com/axgle/mahonia
+# github.com/blang/semver v3.5.1+incompatible
+github.com/blang/semver
+# github.com/go-playground/locales v0.13.0
+github.com/go-playground/locales
+github.com/go-playground/locales/currency
+# github.com/go-playground/universal-translator v0.17.0
+github.com/go-playground/universal-translator
+# github.com/go-redis/redis v6.15.7+incompatible
+github.com/go-redis/redis
+github.com/go-redis/redis/internal
+github.com/go-redis/redis/internal/consistenthash
+github.com/go-redis/redis/internal/hashtag
+github.com/go-redis/redis/internal/pool
+github.com/go-redis/redis/internal/proto
+github.com/go-redis/redis/internal/util
+# github.com/goinggo/mapstructure v0.0.0-20140717182941-194205d9b4a9
+github.com/goinggo/mapstructure
+# github.com/golang/snappy v0.0.1
+github.com/golang/snappy
+# github.com/leodido/go-urn v1.2.0
+github.com/leodido/go-urn
+# github.com/nsqio/go-nsq v1.0.8
+github.com/nsqio/go-nsq
+# github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
+github.com/op/go-logging
+# github.com/tebeka/selenium v0.9.9
+github.com/tebeka/selenium
+github.com/tebeka/selenium/chrome
+github.com/tebeka/selenium/firefox
+github.com/tebeka/selenium/internal/zip
+github.com/tebeka/selenium/log
+# github.com/ymzuiku/hit v0.0.0-20190525155149-18097f1d08f4
+github.com/ymzuiku/hit
+# golang.org/x/net v0.0.0-20200202094626-16171245cfb2
+golang.org/x/net/html
+golang.org/x/net/html/atom
+# gopkg.in/go-playground/validator.v9 v9.31.0
+gopkg.in/go-playground/validator.v9
+# gopkg.in/yaml.v2 v2.2.8
+gopkg.in/yaml.v2
+# sourcegraph.com/sourcegraph/go-selenium v0.0.0-20170113155244-3da7d00aac9c
+sourcegraph.com/sourcegraph/go-selenium

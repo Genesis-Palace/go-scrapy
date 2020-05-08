@@ -9,14 +9,13 @@ import (
 	"time"
 )
 
-type Proxy bool
+type BrowserName String
 
 const (
 	GET      = "get"
 	POST     = "post"
 	POSTJSON = "post-json"
 	// 使用代理时 setProxy(Use)
-	Use            Proxy = true
 	DefaultTimeOut       = time.Second
 )
 
