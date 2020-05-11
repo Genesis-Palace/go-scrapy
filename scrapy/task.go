@@ -26,6 +26,7 @@ func (t *Crawler) SetPipelines(cb func(i ItemInterfaceI)) *Crawler{
 	t.Lock()
 	defer t.Unlock()
 	t.Cb = cb
+	return t
 }
 
 func (t *Crawler) Html() String {
