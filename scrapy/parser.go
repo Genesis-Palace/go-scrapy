@@ -66,11 +66,14 @@ func (g *GoQueryParser) Parser(html String, item ItemInterfaceI, sss ...string) 
 	}
 	var src = NewList()
 	var href = NewList()
+	var text = NewList()
 	doc.Find(g.pattern.String()).Each(func(i int, selection *goquery.Selection) {
 		if s, ok := selection.Attr("src"); ok {
 			src.Add(s)
 		} else if h, ok := selection.Attr("href"); ok {
 			href.Add(h)
+		}else if s := String(selection.Text()); !s.Empty(){
+			text.Add(s)
 		} else {
 			key := newKey(html, sss...)
 			h, _ := selection.Html()
@@ -80,11 +83,11 @@ func (g *GoQueryParser) Parser(html String, item ItemInterfaceI, sss ...string) 
 	})
 	switch {
 	case !src.Empty():
-		item.Add(map[string]interface{}{"src": src.Items()})
+		item.Add(NewPr("src", src.Items()))
 	case !href.Empty() && len(sss) != 0:
-		item.Add(map[string]interface{}{sss[0]: href.Items()})
+		item.Add(NewPr(sss[0], href.Items()))
 	case !href.Empty():
-		item.Add(map[string]interface{}{"href": href.Items()})
+		item.Add(NewPr("href", href.Items()))
 	}
 	return item, true
 }
