@@ -22,7 +22,7 @@ func (t *Crawler) Validate() (err error) {
 	return v.Struct(t)
 }
 
-func (t *Crawler) SetPipelines(cb func(i ItemInterfaceI)) {
+func (t *Crawler) SetPipelines(cb func(i ItemInterfaceI)) *Crawler{
 	t.Lock()
 	defer t.Unlock()
 	t.Cb = cb
