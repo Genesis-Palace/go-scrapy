@@ -93,6 +93,15 @@ func TestNewTasks(t *testing.T) {
 	time.Sleep(time.Second)
 }
 
+
+func TestNewTextParser(t *testing.T){
+	var url = crawler.String("https://www.wegame.com.cn/store/games")
+	var parser = crawler.NewGoQueryTextParser(".gamecard-tit a")
+	var item = crawler.NewMap()
+	crawler.NewCrawler(url, item).SetParser(parser).Do()
+	t.Log(item)
+}
+
 //func TestNewCrawler(t *testing.T) {
 //	var uc = make(chan crawler.String, 100)
 //	go func() {

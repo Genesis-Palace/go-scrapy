@@ -154,6 +154,7 @@ func NewNext(arg ... interface{}) (*Next, error){
 type Next struct {
 	G map[string]string
 	R map[string]string
+	T map[string]string
 }
 
 func (n *Next) Load(m map[string]interface{}) error {
@@ -170,6 +171,10 @@ func (n *Next) MergeGr() (result Pattern) {
 	}
 	for k, v := range n.R {
 		result[k] = R(v)
+	}
+
+	for k, v := range n.T{
+		result[k] = T(v)
 	}
 	return result
 }

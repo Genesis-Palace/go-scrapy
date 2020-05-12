@@ -15,6 +15,7 @@ var log = go_utils.Log()
 type Pattern map[string]interface{}
 type R string
 type G string
+type T string
 
 type ParserResult struct {
 	Key   string
@@ -52,11 +53,33 @@ func NewRegexParser(pattern R) *RegexParser {
 	}
 }
 
+type GoQueryTextParser struct {
+	Html    string
+	pattern String
+	DefaultParser
+}
+
+func (g *GoQueryTextParser) Parser(html String, item ItemInterfaceI, sss ...string) (ItemInterfaceI, bool) {
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(AutoGetHtmlEncode(html.String())))
+	if err != nil {
+		log.Error(err)
+		return item, false
+	}
+	texts := NewList()
+	doc.Find(g.pattern.String()).Each(func(i int, selection *goquery.Selection) {
+		texts.Add(selection.Text())
+	})
+	item.Add(NewPr("text", texts.Items()))
+	return item, true
+}
+
+
 type GoQueryParser struct {
 	Html    string
 	pattern String
 	DefaultParser
 }
+
 
 func (g *GoQueryParser) Parser(html String, item ItemInterfaceI, sss ...string) (ItemInterfaceI, bool) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(AutoGetHtmlEncode(html.String())))
@@ -66,14 +89,11 @@ func (g *GoQueryParser) Parser(html String, item ItemInterfaceI, sss ...string) 
 	}
 	var src = NewList()
 	var href = NewList()
-	var text = NewList()
 	doc.Find(g.pattern.String()).Each(func(i int, selection *goquery.Selection) {
 		if s, ok := selection.Attr("src"); ok {
 			src.Add(s)
 		} else if h, ok := selection.Attr("href"); ok {
 			href.Add(h)
-		}else if s := String(selection.Text()); !s.Empty(){
-			text.Add(s)
 		} else {
 			key := newKey(html, sss...)
 			h, _ := selection.Html()
@@ -95,6 +115,12 @@ func (g *GoQueryParser) Parser(html String, item ItemInterfaceI, sss ...string) 
 func NewGoQueryParser(pattern G) *GoQueryParser {
 	return &GoQueryParser{
 		pattern: String(pattern),
+	}
+}
+
+func NewGoQueryTextParser(pattern T) *GoQueryTextParser{
+	return &GoQueryTextParser{
+		pattern:       String(pattern),
 	}
 }
 
@@ -140,6 +166,8 @@ func (m *MixedParser) Parser(html String, item ItemInterfaceI, s ...string) (i I
 			res = NewRegexParser(v.(R))
 		case G:
 			res = NewGoQueryParser(v.(G))
+		case T:
+			res = NewGoQueryTextParser(v.(T))
 		default:
 			log.Debug(k)
 			continue
