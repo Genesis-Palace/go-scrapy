@@ -67,7 +67,7 @@ func (g *GoQueryTextParser) Parser(html String, item ItemInterfaceI, sss ...stri
 	}
 	texts := NewList()
 	doc.Find(g.pattern.String()).Each(func(i int, selection *goquery.Selection) {
-		texts.Add(selection.Text())
+		texts.Add(strings.TrimSpace(selection.Text()))
 	})
 	switch len(sss) > 0 {
 	case true:
