@@ -69,7 +69,12 @@ func (g *GoQueryTextParser) Parser(html String, item ItemInterfaceI, sss ...stri
 	doc.Find(g.pattern.String()).Each(func(i int, selection *goquery.Selection) {
 		texts.Add(selection.Text())
 	})
-	item.Add(NewPr("text", texts.Items()))
+	switch len(sss) > 0 {
+	case true:
+		item.Add(NewPr(sss[0], texts.Items()))
+	default:
+		item.Add(NewPr("text", texts.Items()))
+	}
 	return item, true
 }
 
