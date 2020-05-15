@@ -13,9 +13,61 @@ import (
 var log = go_utils.Log()
 
 type Pattern map[string]interface{}
+
+// 正则表达式解析
 type R string
+
+// goquery解析
 type G string
+
+//goquery解析html指定节点的text
 type T string
+
+//goquery解析html指定节点的attrib
+type _A string
+
+func A(pattern _A, attrib ...string) *GoQueryAttribParser {
+	if len(attrib) == 0{
+		return &GoQueryAttribParser{
+			pattern: String(pattern),
+		}
+	}
+	return &GoQueryAttribParser{
+		pattern: String(pattern),
+		attrib: String(attrib[0]),
+	}
+}
+
+type GoQueryAttribParser struct {
+	pattern String
+	DefaultParser
+	Result *List
+	attrib String
+}
+
+func (g *GoQueryAttribParser) Validate() bool{
+	return !g.Result.Empty()
+}
+
+func (g *GoQueryAttribParser) Parser(html String, item ItemInterfaceI, sss ...string) (ItemInterfaceI, bool) {
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(AutoGetHtmlEncode(html.String())))
+	if err != nil {
+		log.Error(err)
+		return item, false
+	}
+	attrib := NewList()
+	doc.Find(g.pattern.String()).Each(func(i int, selection *goquery.Selection) {
+		if v, ok := selection.Attr(g.attrib.String()); ok {
+			attrib.Add(v)
+		}
+	})
+	if !g.attrib.Empty(){
+		item.Add(NewPr(g.attrib.String(), attrib.Items()))
+	}else {
+		item.Add(NewPr("attribs", attrib.Items()))
+	}
+	return item, true
+}
 
 type ParserResult struct {
 	Key   string
@@ -78,13 +130,11 @@ func (g *GoQueryTextParser) Parser(html String, item ItemInterfaceI, sss ...stri
 	return item, true
 }
 
-
 type GoQueryParser struct {
 	Html    string
 	pattern String
 	DefaultParser
 }
-
 
 func (g *GoQueryParser) Parser(html String, item ItemInterfaceI, sss ...string) (ItemInterfaceI, bool) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(AutoGetHtmlEncode(html.String())))
@@ -123,13 +173,13 @@ func NewGoQueryParser(pattern G) *GoQueryParser {
 	}
 }
 
-func NewGoQueryTextParser(pattern T) *GoQueryTextParser{
+func NewGoQueryTextParser(pattern T) *GoQueryTextParser {
 	return &GoQueryTextParser{
-		pattern:       String(pattern),
+		pattern: String(pattern),
 	}
 }
 
-type JsonParser struct{
+type JsonParser struct {
 	DefaultParser
 	Html    string
 	pattern String
@@ -138,7 +188,7 @@ type JsonParser struct{
 func (r *JsonParser) Parser(htm String, interfaceI ItemInterfaceI, s ...string) (i ItemInterfaceI, ret bool) {
 	var res = make(map[string]interface{})
 	err := json.Unmarshal(htm.Decode(), &res)
-	if err != nil{
+	if err != nil {
 		log.Warning("json parser unmarshal json error.")
 		return
 	}
@@ -147,8 +197,7 @@ func (r *JsonParser) Parser(htm String, interfaceI ItemInterfaceI, s ...string) 
 	return
 }
 
-
-func NewJsonParser() *JsonParser{
+func NewJsonParser() *JsonParser {
 	return &JsonParser{}
 }
 
@@ -173,6 +222,8 @@ func (m *MixedParser) Parser(html String, item ItemInterfaceI, s ...string) (i I
 			res = NewGoQueryParser(v.(G))
 		case T:
 			res = NewGoQueryTextParser(v.(T))
+		case *GoQueryAttribParser:
+			res = v.(*GoQueryAttribParser)
 		default:
 			log.Debug(k)
 			continue

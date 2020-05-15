@@ -1,6 +1,7 @@
 package test
 
 import (
+	"fmt"
 	crawler "github.com/Genesis-Palace/go-scrapy/scrapy"
 	"path/filepath"
 	"testing"
@@ -102,32 +103,48 @@ func TestNewTextParser(t *testing.T){
 	t.Log(item)
 }
 
-//func TestNewCrawler(t *testing.T) {
-//	var uc = make(chan crawler.String, 100)
-//	go func() {
-//		var url = crawler.String("http://www.toutiaonews.com")
-//		var parser = crawler.NewGoQueryParser(".newsList li dl dt a")
-//		var item = crawler.NewMap()
-//		c := crawler.NewCrawler(url, item)
-//		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
-//		host, _ := crawler.Url(url).Host()
-//		for _, v := range item.Items()["href"].([]interface{}) {
-//			if _, err := crawler.Host(v.(string)); err != nil {
-//				continue
-//			}
-//			uc <- crawler.String(fmt.Sprintf("http://%s/%s", host, v))
-//		}
-//		close(uc)
-//	}()
-//	for u := range uc {
-//		var parser = crawler.NewMixdParser(crawler.Pattern{
-//			"title":     crawler.G(".article-body h1"),
-//			"date":      crawler.R(`时间：([0-9].*[0-9])`),
-//			"recommend": crawler.G(".related-recul li a"),
-//		})
-//		var item = crawler.NewMap()
-//		c := crawler.NewCrawler(u, item)
-//		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
-//		t.Log(item.Items())
-//	}
-//}
+func TestNewAttribParser(t *testing.T){
+	var url = crawler.String("https://www.wegame.com.cn/store/games")
+	var parser = crawler.NewMixdParser(crawler.Pattern{
+		"title": crawler.A(".gamecard-tit a", "title"),
+		"href": crawler.G(".gamecard-tit a"),
+	})
+	var item = crawler.NewMap()
+	start := time.Now()
+	crawler.NewCrawler(url, item).SetTimeOut(1).SetParser(parser).Do()
+	t.Log(time.Now().Sub(start))
+	for k, v := range item.Items(){
+		t.Log(k, v)
+	}
+}
+
+
+func TestNewCrawler(t *testing.T) {
+	var uc = make(chan crawler.String, 100)
+	go func() {
+		var url = crawler.String("http://www.toutiaonews.com")
+		var parser = crawler.NewGoQueryParser(".newsList li dl dt a")
+		var item = crawler.NewMap()
+		c := crawler.NewCrawler(url, item)
+		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
+		host, _ := crawler.Url(url).Host()
+		for _, v := range item.Items()["href"].([]interface{}) {
+			if _, err := crawler.Host(v.(string)); err != nil {
+				continue
+			}
+			uc <- crawler.String(fmt.Sprintf("http://%s/%s", host, v))
+		}
+		close(uc)
+	}()
+	for u := range uc {
+		var parser = crawler.NewMixdParser(crawler.Pattern{
+			"title":     crawler.G(".article-body h1"),
+			"date":      crawler.R(`时间：([0-9].*[0-9])`),
+			"recommend": crawler.G(".related-recul li a"),
+		})
+		var item = crawler.NewMap()
+		c := crawler.NewCrawler(u, item)
+		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
+		t.Log(item.Items())
+	}
+}

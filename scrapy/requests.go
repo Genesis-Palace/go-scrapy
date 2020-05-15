@@ -12,11 +12,10 @@ import (
 type BrowserName String
 
 const (
-	GET      = "get"
-	POST     = "post"
-	POSTJSON = "post-json"
-	// 使用代理时 setProxy(Use)
-	DefaultTimeOut       = time.Second
+	GET                          = "get"
+	POST                         = "post"
+	POSTJSON                     = "post-json"
+	DefaultTimeOut time.Duration = 1
 )
 
 func NewAbutunProxy(appid, secret, proxyServer string) *AbuyunProxy {
