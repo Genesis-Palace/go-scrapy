@@ -76,10 +76,10 @@ func main(){
 			* type string
 		* scrapy.Pattern 混合类型
 			* type map[string]interface{}
-        * scrapy.T node text解析
-            * type string
-        * scrapy A node attrib解析
-            * type *GoQueryAttribParser
+       		* scrapy.T node text解析
+            		* type string
+	        * scrapy A node attrib解析
+        	        * type *GoQueryAttribParser
 		parser提供接口, 如需扩展, 完成接口实现即可.
 	*/
 	log.Info(item.Items())
