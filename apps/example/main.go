@@ -161,7 +161,7 @@ func main(){
 	//GetHtml()
 	//wg.Wait()
 	//// 增加jsonparser基础实现, 将response.Html转成map 并写入item中. 解析由开发者自定义即可
-	//NewToutiaoCrawlerJsonParser()
+	NewToutiaoCrawlerJsonParser()
 	//NewSoHuNewsJsonParser()
 }
 
@@ -172,7 +172,7 @@ func NewToutiaoCrawlerJsonParser(){
 	var url scrapy.String = "https://www.toutiao.com/article/v2/tab_comments/?aid=24&app_name=toutiao-web&group_id=6821094670118945293&item_id=6821094670118945293&offset=0&count=5"
 	var item = scrapy.NewMap()
 	scrapy.NewCrawler(url, item).SetParser(scrapy.NewJsonParser()).Do().Html()
-	log.Info(item)
+	log.Debug(item)
 }
 
 func NewSoHuNewsJsonParser(){
