@@ -134,13 +134,15 @@ func TestNewCrawler(t *testing.T) {
 	}()
 	for u := range uc {
 		var parser = crawler.NewMixdParser(crawler.Pattern{
-			"title":     crawler.G(".article-body h1"),
-			"date":      crawler.R(`时间：([0-9].*[0-9])`),
-			"recommend": crawler.G(".related-recul li a"),
+			"title":        crawler.T(".article-body h1"),
+			"date":         crawler.R(`时间：([0-9].*[0-9])`),
+			"inner_source": crawler.T(`.user`),
+			"tags":         crawler.A(`meta[name="keywords"]`, `content`),
+			//"recommend": crawler.G(".related-recul li a"),
 		})
 		var item = crawler.NewMap()
 		c := crawler.NewCrawler(u, item)
 		c.SetTimeOut(3 * time.Second).SetParser(parser).Do()
-		t.Log(item.Items())
+		t.Log(item.Dumps())
 	}
 }

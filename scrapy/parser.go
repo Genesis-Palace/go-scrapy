@@ -50,15 +50,11 @@ func (g *GoQueryAttribParser) Parser(html String, item IItem, sss ...string) (II
 		log.Error(err)
 		return item, false
 	}
-	attrib := NewList()
 	doc.Find(g.pattern.String()).Each(func(i int, selection *goquery.Selection) {
 		if v, ok := selection.Attr(g.attrib); ok {
-			attrib.Add(v)
+			item.Add(NewPr(g.attrib, v))
 		}
 	})
-	if !attrib.Empty() {
-		item.Add(NewPr(g.attrib, attrib.Items()))
-	}
 	return item, true
 }
 
@@ -110,15 +106,15 @@ func (g *GoQueryTextParser) Parser(html String, item IItem, sss ...string) (IIte
 		log.Error(err)
 		return item, false
 	}
-	texts := NewList()
+	texts := []string{}
 	doc.Find(g.pattern.String()).Each(func(i int, selection *goquery.Selection) {
-		texts.Add(strings.TrimSpace(selection.Text()))
+		texts = append(texts, strings.TrimSpace(selection.Text()))
 	})
 	switch len(sss) > 0 {
 	case true:
-		item.Add(NewPr(sss[0], texts.Items()))
+		item.Add(NewPr(sss[0], strings.Join(texts, ",")))
 	default:
-		item.Add(NewPr("text", texts.Items()))
+		item.Add(NewPr("text", strings.Join(texts, ",")))
 	}
 	return item, true
 }
