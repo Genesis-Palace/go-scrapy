@@ -26,15 +26,10 @@ type T string
 //goquery解析html指定节点的attrib
 type _A string
 
-func A(pattern _A, attrib ...string) *GoQueryAttribParser {
-	if len(attrib) == 0{
-		return &GoQueryAttribParser{
-			pattern: String(pattern),
-		}
-	}
+func A(pattern _A, attrib string) *GoQueryAttribParser {
 	return &GoQueryAttribParser{
 		pattern: String(pattern),
-		attrib: String(attrib[0]),
+		attrib:  attrib,
 	}
 }
 
@@ -42,10 +37,10 @@ type GoQueryAttribParser struct {
 	pattern String
 	DefaultParser
 	Result *List
-	attrib String
+	attrib string
 }
 
-func (g *GoQueryAttribParser) Validate() bool{
+func (g *GoQueryAttribParser) Validate() bool {
 	return !g.Result.Empty()
 }
 
@@ -57,14 +52,12 @@ func (g *GoQueryAttribParser) Parser(html String, item ItemInterfaceI, sss ...st
 	}
 	attrib := NewList()
 	doc.Find(g.pattern.String()).Each(func(i int, selection *goquery.Selection) {
-		if v, ok := selection.Attr(g.attrib.String()); ok {
+		if v, ok := selection.Attr(g.attrib); ok {
 			attrib.Add(v)
 		}
 	})
-	if !g.attrib.Empty(){
-		item.Add(NewPr(g.attrib.String(), attrib.Items()))
-	}else {
-		item.Add(NewPr("attribs", attrib.Items()))
+	if !attrib.Empty() {
+		item.Add(NewPr(g.attrib, attrib.Items()))
 	}
 	return item, true
 }

@@ -94,8 +94,7 @@ func TestNewTasks(t *testing.T) {
 	time.Sleep(time.Second)
 }
 
-
-func TestNewTextParser(t *testing.T){
+func TestNewTextParser(t *testing.T) {
 	var url = crawler.String("https://www.wegame.com.cn/store/games")
 	var parser = crawler.NewGoQueryTextParser(".gamecard-tit a")
 	var item = crawler.NewMap()
@@ -103,21 +102,18 @@ func TestNewTextParser(t *testing.T){
 	t.Log(item)
 }
 
-func TestNewAttribParser(t *testing.T){
+func TestNewAttribParser(t *testing.T) {
 	var url = crawler.String("https://www.wegame.com.cn/store/games")
 	var parser = crawler.NewMixdParser(crawler.Pattern{
 		"title": crawler.A(".gamecard-tit a", "title"),
-		"href": crawler.G(".gamecard-tit a"),
+		"tags":  crawler.A(".gamecard-tit a", "href"),
 	})
 	var item = crawler.NewMap()
-	start := time.Now()
 	crawler.NewCrawler(url, item).SetTimeOut(1).SetParser(parser).Do()
-	t.Log(time.Now().Sub(start))
-	for k, v := range item.Items(){
+	for k, v := range item.Items() {
 		t.Log(k, v)
 	}
 }
-
 
 func TestNewCrawler(t *testing.T) {
 	var uc = make(chan crawler.String, 100)
