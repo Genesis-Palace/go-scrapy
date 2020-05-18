@@ -10,9 +10,9 @@ import (
 
 type Crawler struct {
 	Request *Requests `validate:"required"`
-	Cb      func(i ItemInterfaceI)
-	Parser  ParserInterfaceI `validate:"required"`
-	Item    ItemInterfaceI   `validate:"required"`
+	Cb      func(i IItem)
+	Parser  IParser `validate:"required"`
+	Item    IItem   `validate:"required"`
 	html    String
 	sync.RWMutex
 }
@@ -22,7 +22,7 @@ func (t *Crawler) Validate() (err error) {
 	return v.Struct(t)
 }
 
-func (t *Crawler) SetPipelines(cb func(i ItemInterfaceI)) *Crawler{
+func (t *Crawler) SetPipelines(cb func(i IItem)) *Crawler {
 	t.Lock()
 	defer t.Unlock()
 	t.Cb = cb
@@ -60,7 +60,7 @@ func (t *Crawler) SetTimeOut(duration time.Duration) *Crawler {
 	t.Request.SetTimeOut(duration)
 	return t
 }
-func (t *Crawler) SetParser(i ParserInterfaceI) *Crawler {
+func (t *Crawler) SetParser(i IParser) *Crawler {
 	t.Lock()
 	defer t.Unlock()
 	t.Parser = i
@@ -86,17 +86,17 @@ func NewCrawler(url String, args ...interface{}) *Crawler {
 	c := &Crawler{
 		Request: NewRequest(url),
 	}
-	for _, arg := range args{
+	for _, arg := range args {
 		switch arg.(type) {
-		case ItemInterfaceI:
-			c.Item = arg.(ItemInterfaceI)
+		case IItem:
+			c.Item = arg.(IItem)
 		}
 	}
 	c.Item.Add(NewPr("url", url))
 	return c
 }
 
-func NewProxyCrawler(url String, proxy *AbuyunProxy, item ItemInterfaceI) *Crawler {
+func NewProxyCrawler(url String, proxy *AbuyunProxy, item IItem) *Crawler {
 	return &Crawler{
 		Request: NewRequest(url, proxy),
 		Item:    item,

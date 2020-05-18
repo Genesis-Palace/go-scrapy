@@ -44,7 +44,7 @@ func (g *GoQueryAttribParser) Validate() bool {
 	return !g.Result.Empty()
 }
 
-func (g *GoQueryAttribParser) Parser(html String, item ItemInterfaceI, sss ...string) (ItemInterfaceI, bool) {
+func (g *GoQueryAttribParser) Parser(html String, item IItem, sss ...string) (IItem, bool) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(AutoGetHtmlEncode(html.String())))
 	if err != nil {
 		log.Error(err)
@@ -71,18 +71,18 @@ func (p *ParserResult) String() string {
 	return fmt.Sprintf(`(Key: %s), (Value: %v)`, p.Key, p.Value)
 }
 
-type ParserInterfaceI interface {
+type IParser interface {
 	Validate() bool
-	Load(i ItemInterfaceI)
-	Parser(string2 String, i ItemInterfaceI, string3 ...string) (ItemInterfaceI, bool)
+	Load(i IItem)
+	Parser(string2 String, i IItem, string3 ...string) (IItem, bool)
 }
 
 type DefaultParser struct {
-	Result ItemInterfaceI
+	Result IItem
 	sync.RWMutex
 }
 
-func (r *DefaultParser) Load(i ItemInterfaceI) {
+func (r *DefaultParser) Load(i IItem) {
 	r.Lock()
 	defer r.Unlock()
 	i = r.Result
@@ -104,7 +104,7 @@ type GoQueryTextParser struct {
 	DefaultParser
 }
 
-func (g *GoQueryTextParser) Parser(html String, item ItemInterfaceI, sss ...string) (ItemInterfaceI, bool) {
+func (g *GoQueryTextParser) Parser(html String, item IItem, sss ...string) (IItem, bool) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(AutoGetHtmlEncode(html.String())))
 	if err != nil {
 		log.Error(err)
@@ -129,7 +129,7 @@ type GoQueryParser struct {
 	DefaultParser
 }
 
-func (g *GoQueryParser) Parser(html String, item ItemInterfaceI, sss ...string) (ItemInterfaceI, bool) {
+func (g *GoQueryParser) Parser(html String, item IItem, sss ...string) (IItem, bool) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(AutoGetHtmlEncode(html.String())))
 	if err != nil {
 		log.Error(err)
@@ -178,7 +178,7 @@ type JsonParser struct {
 	pattern String
 }
 
-func (r *JsonParser) Parser(htm String, interfaceI ItemInterfaceI, s ...string) (i ItemInterfaceI, ret bool) {
+func (r *JsonParser) Parser(htm String, interfaceI IItem, s ...string) (i IItem, ret bool) {
 	var res = make(map[string]interface{})
 	err := json.Unmarshal(htm.Decode(), &res)
 	if err != nil {
@@ -205,8 +205,8 @@ func NewMixdParser(pattern Pattern) *MixedParser {
 	}
 }
 
-func (m *MixedParser) Parser(html String, item ItemInterfaceI, s ...string) (i ItemInterfaceI, ret bool) {
-	var res ParserInterfaceI
+func (m *MixedParser) Parser(html String, item IItem, s ...string) (i IItem, ret bool) {
+	var res IParser
 	for k, v := range m.pattern {
 		switch v.(type) {
 		case R:
@@ -232,7 +232,7 @@ type RegexParser struct {
 	DefaultParser
 }
 
-func (r *RegexParser) Parser(htm String, interfaceI ItemInterfaceI, s ...string) (i ItemInterfaceI, ret bool) {
+func (r *RegexParser) Parser(htm String, interfaceI IItem, s ...string) (i IItem, ret bool) {
 	key := newKey(htm, s...)
 	var result = Regex(AutoGetHtmlEncode(htm.String()), r.Pattern.String())
 	if len(result) == 0 {

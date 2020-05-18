@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type ItemInterfaceI interface {
+type IItem interface {
 	// add property
 	Add(v interface{})
 	Dumps() (String, error)
@@ -34,7 +34,7 @@ func (f *Feeds) Add(v interface{}) {
 			Description: desc,
 		}
 		f.Channel.AddItem(x)
-		f.Channel.LastBuildDate = time.Now().Format(timeFormat)
+		f.Channel.LastBuildDate = time.Now().Format(TimeFormat)
 	}
 }
 

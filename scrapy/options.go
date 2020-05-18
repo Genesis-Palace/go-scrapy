@@ -15,14 +15,13 @@ import (
 	"time"
 )
 
-
 const (
-	timeFormat = "2006-01-02 15:04:05"
+	TimeFormat = "2006-01-02 15:04:05"
 )
 
-type BrokerInterfaceI interface {
+type IBroker interface {
 	Init()
-	Add(item ItemInterfaceI) bool
+	Add(item IItem) bool
 }
 
 type Broker struct {
@@ -43,7 +42,7 @@ func (b *Broker) Init() {
 	}
 }
 
-func (b *Broker) Add(item ItemInterfaceI) bool {
+func (b *Broker) Add(item IItem) bool {
 	switch true {
 	case Validated(b.RedisBroker):
 		b.RedisBroker.Add(item)
@@ -55,8 +54,8 @@ func (b *Broker) Add(item ItemInterfaceI) bool {
 	return true
 }
 
-func (b *Broker) GetBroker() BrokerInterfaceI {
-	var broker BrokerInterfaceI
+func (b *Broker) GetBroker() IBroker {
+	var broker IBroker
 	switch true {
 	case Validated(b.RedisBroker):
 		broker = b.RedisBroker
@@ -125,14 +124,14 @@ type Consumer struct {
 	Limit int
 }
 
-func NewNext(arg ... interface{}) (*Next, error){
-	if len(arg) == 0{
+func NewNext(arg ...interface{}) (*Next, error) {
+	if len(arg) == 0 {
 		return &Next{
 			G: make(map[string]string),
 			R: make(map[string]string),
 		}, nil
 	}
-	for _, a := range arg{
+	for _, a := range arg {
 		switch a.(type) {
 		case map[string]interface{}:
 			next := &Next{
@@ -140,7 +139,7 @@ func NewNext(arg ... interface{}) (*Next, error){
 				R: make(map[string]string),
 			}
 			err := next.Load(a.(map[string]interface{}))
-			if err != nil{
+			if err != nil {
 				return nil, err
 			}
 			return next, nil
@@ -173,7 +172,7 @@ func (n *Next) MergeGr() (result Pattern) {
 		result[k] = R(v)
 	}
 
-	for k, v := range n.T{
+	for k, v := range n.T {
 		result[k] = T(v)
 	}
 	return result
@@ -251,7 +250,7 @@ func (n *NsqBroker) getPushTopicUrl() string {
 	return n.pushUrl
 }
 
-func (n *NsqBroker) Add(item ItemInterfaceI) bool {
+func (n *NsqBroker) Add(item IItem) bool {
 	doc, err := item.Dumps()
 	if err != nil {
 		time.Sleep(100 * time.Millisecond)
@@ -279,7 +278,7 @@ type RedisBroker struct {
 	WaitGroupWrap
 }
 
-func (r *RedisBroker) Add(item ItemInterfaceI) bool {
+func (r *RedisBroker) Add(item IItem) bool {
 	doc, _ := item.Dumps()
 	_, err := r.c.LPush(r.Topic, doc.String()).Result()
 	if err != nil {

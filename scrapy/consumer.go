@@ -16,7 +16,7 @@ func DecodeMessage(b []byte) (*nsq.Message, error) {
 	return &msg, nil
 }
 
-type ConsumerInterfaceI interface {
+type IConsumer interface {
 	Init()
 	Run()
 }
@@ -61,7 +61,7 @@ func (n *nsqConsumer) Run() {
 	waiter.Wait()
 }
 
-func (n *nsqConsumer) SetHandler(f nsq.Handler) ConsumerInterfaceI {
+func (n *nsqConsumer) SetHandler(f nsq.Handler) IConsumer {
 	n.msgHandler = f
 	return n
 }
@@ -86,7 +86,7 @@ func (r *RedisConsumer) Init() {
 	log.Info("redis consumer inited.")
 }
 
-func (r *RedisConsumer) SetHandler(handler nsq.Handler) ConsumerInterfaceI {
+func (r *RedisConsumer) SetHandler(handler nsq.Handler) IConsumer {
 	r.f = handler
 	return r
 }

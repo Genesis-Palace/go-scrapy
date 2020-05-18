@@ -37,7 +37,7 @@ func (p AbuyunProxy) ProxyClient() *http.Client {
 	return &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyUrl)}}
 }
 
-type ClientInterface interface {
+type IClient interface {
 	Get(url String, args ...interface{}) (*requests.Response, error)
 	PostJson(url, js String, args ...interface{}) (*requests.Response, error)
 	SetTimeOut(duration time.Duration)
@@ -113,7 +113,7 @@ type Requests struct {
 	method  String
 	timeout time.Duration
 	json    String
-	c       ClientInterface
+	c       IClient
 	sync.RWMutex
 }
 
@@ -200,14 +200,14 @@ func NewRequest(url String, args ...interface{}) *Requests {
 	return req
 }
 
-func NewDefaultClient() ClientInterface {
+func NewDefaultClient() IClient {
 	return &DefaultClient{
 		c:       requests.Requests(),
 		RWMutex: sync.RWMutex{},
 	}
 }
 
-func NewProxyClient(proxy *AbuyunProxy) ClientInterface {
+func NewProxyClient(proxy *AbuyunProxy) IClient {
 	client := requests.Requests()
 	client.Client = proxy.ProxyClient()
 	return &ProxyClient{

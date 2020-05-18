@@ -1,6 +1,6 @@
 package scrapy
 
-func DefaultPipelines(i ItemInterfaceI) {
+func DefaultPipelines(i IItem) {
 	if d, e := i.Dumps(); e == nil {
 		log.Debug(d)
 	}
