@@ -1,11 +1,12 @@
 package scrapy
 
 import (
-	"github.com/Genesis-Palace/requests"
-	"gopkg.in/go-playground/validator.v9"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/Genesis-Palace/requests"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 type Crawler struct {
@@ -87,9 +88,9 @@ func NewCrawler(url String, args ...interface{}) *Crawler {
 		Request: NewRequest(url),
 	}
 	for _, arg := range args {
-		switch arg.(type) {
+		switch v := arg.(type) {
 		case IItem:
-			c.Item = arg.(IItem)
+			c.Item = v
 		}
 	}
 	c.Item.Add(NewPr("url", url))

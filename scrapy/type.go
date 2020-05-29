@@ -24,7 +24,10 @@ func (s *String) String() string {
 
 func (s *String) Hash() string {
 	h := md5.New()
-	h.Write([]byte(*s))
+	_, err := h.Write([]byte(*s))
+	if err != nil {
+		return ""
+	}
 	return hex.EncodeToString(h.Sum(nil))
 }
 
@@ -59,23 +62,23 @@ func (m *Map) Load(b []byte) error {
 
 func (m *Map) Pop(s String) interface{} {
 	m.Lock()
-	m.Unlock()
+	defer m.Unlock()
 	return m.del(s)
 }
 
 func (m *Map) Add(v interface{}) {
 	m.Lock()
-	switch v.(type) {
+	switch t := v.(type) {
 	case map[string]string:
-		for key, value := range v.(map[string]string) {
+		for key, value := range t {
 			m.m[String(key)] = value
 		}
 	case map[string]interface{}:
-		for key, value := range v.(map[string]interface{}) {
+		for key, value := range t {
 			m.m[String(key)] = value
 		}
 	case *ParserResult:
-		m.m[String(v.(*ParserResult).Key)] = v.(*ParserResult).Value
+		m.m[String(t.Key)] = t.Value
 	}
 	m.Unlock()
 }

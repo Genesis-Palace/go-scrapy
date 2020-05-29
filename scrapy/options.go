@@ -2,17 +2,18 @@ package scrapy
 
 import (
 	"encoding/json"
-	"github.com/Genesis-Palace/go-utils"
-	"github.com/Genesis-Palace/requests"
-	"github.com/go-redis/redis"
-	"github.com/goinggo/mapstructure"
-	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"math/rand"
 	"net/url"
 	"strings"
 	"sync"
 	"time"
+
+	go_utils "github.com/Genesis-Palace/go-utils"
+	"github.com/Genesis-Palace/requests"
+	"github.com/go-redis/redis"
+	"github.com/goinggo/mapstructure"
+	"gopkg.in/yaml.v2"
 )
 
 const (
@@ -132,13 +133,13 @@ func NewNext(arg ...interface{}) (*Next, error) {
 		}, nil
 	}
 	for _, a := range arg {
-		switch a.(type) {
+		switch v := a.(type) {
 		case map[string]interface{}:
 			next := &Next{
 				G: make(map[string]string),
 				R: make(map[string]string),
 			}
-			err := next.Load(a.(map[string]interface{}))
+			err := next.Load(v)
 			if err != nil {
 				return nil, err
 			}
@@ -281,10 +282,7 @@ type RedisBroker struct {
 func (r *RedisBroker) Add(item IItem) bool {
 	doc, _ := item.Dumps()
 	_, err := r.c.LPush(r.Topic, doc.String()).Result()
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 func (r *RedisBroker) Init() {

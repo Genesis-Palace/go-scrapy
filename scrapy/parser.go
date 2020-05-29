@@ -3,11 +3,12 @@ package scrapy
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+	"sync"
+
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/PuerkitoBio/goquery"
 	"golang.org/x/net/html"
-	"strings"
-	"sync"
 )
 
 var log = go_utils.Log()
@@ -81,7 +82,7 @@ type DefaultParser struct {
 func (r *DefaultParser) Load(i IItem) {
 	r.Lock()
 	defer r.Unlock()
-	i = r.Result
+	r.Result = i
 }
 
 func (r *DefaultParser) Validate() bool {
@@ -170,8 +171,7 @@ func NewGoQueryTextParser(pattern T) *GoQueryTextParser {
 
 type JsonParser struct {
 	DefaultParser
-	Html    string
-	pattern String
+	Html string
 }
 
 func (r *JsonParser) Parser(htm String, interfaceI IItem, s ...string) (i IItem, ret bool) {
@@ -204,15 +204,15 @@ func NewMixdParser(pattern Pattern) *MixedParser {
 func (m *MixedParser) Parser(html String, item IItem, s ...string) (i IItem, ret bool) {
 	var res IParser
 	for k, v := range m.pattern {
-		switch v.(type) {
+		switch t := v.(type) {
 		case R:
-			res = NewRegexParser(v.(R))
+			res = NewRegexParser(t)
 		case G:
-			res = NewGoQueryParser(v.(G))
+			res = NewGoQueryParser(t)
 		case T:
-			res = NewGoQueryTextParser(v.(T))
+			res = NewGoQueryTextParser(t)
 		case *GoQueryAttribParser:
-			res = v.(*GoQueryAttribParser)
+			res = t
 		default:
 			log.Debug(k)
 			continue

@@ -1,12 +1,13 @@
 package scrapy
 
 import (
-	"github.com/Genesis-Palace/requests"
-	"github.com/ymzuiku/hit"
 	"net/http"
 	"net/url"
 	"sync"
 	"time"
+
+	"github.com/Genesis-Palace/requests"
+	"github.com/ymzuiku/hit"
 )
 
 type BrowserName String
@@ -109,7 +110,6 @@ type Requests struct {
 	Url     String
 	headers requests.Header
 	cookies *http.Cookie
-	proxy   bool
 	method  String
 	timeout time.Duration
 	json    String
@@ -141,7 +141,7 @@ func (r *Requests) SetTimeOut(timeout time.Duration) *Requests {
 
 func (r *Requests) SetHeader(headers requests.Header) *Requests {
 	r.Lock()
-	r.Unlock()
+	defer r.Unlock()
 	r.headers = headers
 	r.c.SetHeaders(headers)
 	return r
@@ -152,10 +152,6 @@ func (r *Requests) SetCookies(cookie *http.Cookie) *Requests {
 	r.cookies = cookie
 	r.Unlock()
 	return r
-}
-
-func (r *Requests) timeoutIsNil() bool {
-	return r.timeout.Microseconds() == 0
 }
 
 func (r *Requests) Do() (resp *requests.Response, err error) {
@@ -185,15 +181,15 @@ func NewRequest(url String, args ...interface{}) *Requests {
 		c:       NewDefaultClient(),
 	}
 	for _, arg := range args {
-		switch arg.(type) {
+		switch v := arg.(type) {
 		case requests.Header:
-			req.SetHeader(arg.(requests.Header))
+			req.SetHeader(v)
 		case *http.Cookie:
-			req.SetCookies(arg.(*http.Cookie))
+			req.SetCookies(v)
 		case time.Duration:
-			req.SetTimeOut(arg.(time.Duration))
+			req.SetTimeOut(v)
 		case *AbuyunProxy:
-			req.c = NewProxyClient(arg.(*AbuyunProxy))
+			req.c = NewProxyClient(v)
 		default:
 		}
 	}

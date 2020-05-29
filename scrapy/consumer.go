@@ -2,10 +2,11 @@ package scrapy
 
 import (
 	"encoding/binary"
+	"time"
+
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/go-redis/redis"
 	"github.com/nsqio/go-nsq"
-	"time"
 )
 
 func DecodeMessage(b []byte) (*nsq.Message, error) {
@@ -58,7 +59,6 @@ func (n *nsqConsumer) Run() {
 			select {}
 		})
 	}
-	waiter.Wait()
 }
 
 func (n *nsqConsumer) SetHandler(f nsq.Handler) IConsumer {

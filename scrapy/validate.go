@@ -1,11 +1,12 @@
 package scrapy
 
 import (
-	"github.com/axgle/mahonia"
-	"gopkg.in/go-playground/validator.v9"
 	"regexp"
 	"strings"
 	"sync"
+
+	"github.com/axgle/mahonia"
+	"gopkg.in/go-playground/validator.v9"
 )
 
 var once sync.Once
@@ -13,10 +14,7 @@ var once sync.Once
 func Validated(s interface{}) bool {
 	v := validator.New()
 	err := v.Struct(s)
-	if err != nil {
-		return false
-	}
-	return true
+	return err == nil
 }
 
 // RegexParse : 通过正则表达式提取 html中的指定 regex 元素

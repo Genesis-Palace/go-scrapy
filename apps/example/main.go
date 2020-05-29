@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+
 	"github.com/Genesis-Palace/go-scrapy/scrapy"
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/nsqio/go-nsq"

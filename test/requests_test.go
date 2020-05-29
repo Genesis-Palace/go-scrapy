@@ -1,10 +1,11 @@
 package test
 
 import (
-	"github.com/Genesis-Palace/go-scrapy/scrapy"
-	"github.com/Genesis-Palace/requests"
 	"testing"
 	"time"
+
+	"github.com/Genesis-Palace/go-scrapy/scrapy"
+	"github.com/Genesis-Palace/requests"
 )
 
 func TestNewRequest(t *testing.T) {
