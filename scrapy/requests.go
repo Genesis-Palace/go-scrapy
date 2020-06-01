@@ -33,9 +33,25 @@ type AbuyunProxy struct {
 	ProxyServer string
 }
 
-func (p AbuyunProxy) ProxyClient() *http.Client {
+func (p AbuyunProxy) pullIps() {
+	panic("implement me")
+}
+
+func (p AbuyunProxy) Init() {
+	panic("implement me")
+}
+
+func (p AbuyunProxy) Get() IProxy {
+	panic("implement me")
+}
+
+func (p AbuyunProxy) Put(proxy IProxy) {
+	panic("implement me")
+}
+
+func (p AbuyunProxy) ProxyClient() (*http.Client, IProxy) {
 	proxyUrl, _ := url.Parse("http://" + p.AppID + ":" + p.AppSecret + "@" + p.ProxyServer)
-	return &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyUrl)}}
+	return &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyUrl)}}, nil
 }
 
 type IClient interface {
@@ -68,8 +84,6 @@ func (d *DefaultClient) PostJson(url, js String, args ...interface{}) (*requests
 }
 
 func (d *DefaultClient) SetHeaders(header requests.Header) {
-	d.Lock()
-	defer d.Unlock()
 	for k, v := range header {
 		d.c.Header.Add(k, v)
 	}
@@ -81,8 +95,6 @@ type ProxyClient struct {
 }
 
 func (p *ProxyClient) SetHeaders(header requests.Header) {
-	p.Lock()
-	defer p.Unlock()
 	for k, v := range header {
 		p.c.Header.Add(k, v)
 	}
@@ -142,7 +154,6 @@ func (r *Requests) SetTimeOut(timeout time.Duration) *Requests {
 func (r *Requests) SetHeader(headers requests.Header) *Requests {
 	r.Lock()
 	defer r.Unlock()
-	r.headers = headers
 	r.c.SetHeaders(headers)
 	return r
 }
@@ -177,7 +188,6 @@ type Response struct {
 func NewRequest(url String, args ...interface{}) *Requests {
 	var req = &Requests{
 		Url:     url,
-		RWMutex: sync.RWMutex{},
 		c:       NewDefaultClient(),
 	}
 	for _, arg := range args {
@@ -188,8 +198,10 @@ func NewRequest(url String, args ...interface{}) *Requests {
 			req.SetCookies(v)
 		case time.Duration:
 			req.SetTimeOut(v)
-		case *AbuyunProxy:
-			req.c = NewProxyClient(v)
+		case *http.Client:
+			req.c = newProxyClient(v)
+		case IClient:
+			req.c = v
 		default:
 		}
 	}
@@ -199,15 +211,13 @@ func NewRequest(url String, args ...interface{}) *Requests {
 func NewDefaultClient() IClient {
 	return &DefaultClient{
 		c:       requests.Requests(),
-		RWMutex: sync.RWMutex{},
 	}
 }
 
-func NewProxyClient(proxy *AbuyunProxy) IClient {
+func newProxyClient(c *http.Client) IClient {
 	client := requests.Requests()
-	client.Client = proxy.ProxyClient()
+	client.Client = c
 	return &ProxyClient{
 		c:       client,
-		RWMutex: sync.RWMutex{},
 	}
 }

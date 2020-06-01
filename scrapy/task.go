@@ -9,12 +9,17 @@ import (
 	"gopkg.in/go-playground/validator.v9"
 )
 
+type Auth string
+
 type Crawler struct {
 	Request *Requests `validate:"required"`
 	Cb      func(i IItem)
 	Parser  IParser `validate:"required"`
 	Item    IItem   `validate:"required"`
 	html    String
+	Ip      IProxy
+	isProxy bool
+	ProxyQueue IProxyQueue
 	sync.RWMutex
 }
 
@@ -34,14 +39,30 @@ func (t *Crawler) Html() String {
 	return t.html
 }
 
-func (t *Crawler) Do() *Crawler {
+func (t *Crawler) ipRecovery(args ...interface{}){
+	if !t.isProxy{
+		return
+	}
+	for _, a := range args{
+		switch v:= a.(type) {
+		case error:
+			t.Ip.AddFails()
+			log.Error(t.Ip, v)
+		default:
+			t.Ip.AddSucc()
+		}
+	}
+}
+
+func (t *Crawler) Do() (*Crawler, error) {
 	if err := t.Validate(); err != nil {
-		log.Error(err)
-		return t
+		t.ipRecovery(err)
+		return t, err
 	}
 	res, err := t.Request.Do()
 	if err != nil {
-		return t
+		t.ipRecovery(err)
+		return t, err
 	}
 	t.html = String(res.Text())
 	t.Parser.Parser(t.html, t.Item)
@@ -49,7 +70,8 @@ func (t *Crawler) Do() *Crawler {
 		t.Cb = DefaultPipelines
 	}
 	t.Cb(t.Item)
-	return t
+	t.ipRecovery()
+	return t, nil
 }
 
 func (t *Crawler) SetHeader(header requests.Header) *Crawler {
@@ -97,9 +119,21 @@ func NewCrawler(url String, args ...interface{}) *Crawler {
 	return c
 }
 
-func NewProxyCrawler(url String, proxy *AbuyunProxy, item IItem) *Crawler {
-	return &Crawler{
-		Request: NewRequest(url, proxy),
-		Item:    item,
+func NewProxyCrawler(url String, args ...interface{}) *Crawler {
+	c := new(Crawler)
+	for _, a := range args {
+		switch v := a.(type) {
+		case IProxyQueue:
+			c.isProxy = true
+			clt, ip := v.ProxyClient()
+			c.Ip = ip
+			c.Request = NewRequest(url, clt)
+			c.ProxyQueue = v
+		case IItem:
+			c.Item = v
+		case Auth:
+			c.SetHeader(requests.Header{"Proxy-Authorization": string(v)})
+		}
 	}
+	return c
 }
