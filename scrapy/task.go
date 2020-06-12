@@ -12,13 +12,13 @@ import (
 type Auth string
 
 type Crawler struct {
-	Request *Requests `validate:"required"`
-	Cb      func(i IItem)
-	Parser  IParser `validate:"required"`
-	Item    IItem   `validate:"required"`
-	html    String
-	Ip      IProxy
-	isProxy bool
+	Request    *Requests `validate:"required"`
+	Cb         func(i IItem)
+	Parser     IParser `validate:"required"`
+	Item       IItem   `validate:"required"`
+	html       String
+	Ip         IProxy
+	isProxy    bool
 	ProxyQueue IProxyQueue
 	sync.RWMutex
 }
@@ -39,12 +39,15 @@ func (t *Crawler) Html() String {
 	return t.html
 }
 
-func (t *Crawler) ipRecovery(args ...interface{}){
-	if !t.isProxy{
+func (t *Crawler) ipRecovery(args ...interface{}) {
+	if !t.isProxy {
 		return
 	}
-	for _, a := range args{
-		switch v:= a.(type) {
+	if t.Ip == nil {
+		return
+	}
+	for _, a := range args {
+		switch v := a.(type) {
 		case error:
 			t.Ip.AddFails()
 			log.Error(t.Ip, v)
@@ -55,6 +58,8 @@ func (t *Crawler) ipRecovery(args ...interface{}){
 }
 
 func (t *Crawler) Do() (*Crawler, error) {
+	t.Lock()
+	defer t.Unlock()
 	if err := t.Validate(); err != nil {
 		t.ipRecovery(err)
 		return t, err
@@ -64,7 +69,7 @@ func (t *Crawler) Do() (*Crawler, error) {
 		t.ipRecovery(err)
 		return t, err
 	}
-	t.html = String(res.Text())
+	t.html = String(res.Content())
 	t.Parser.Parser(t.html, t.Item)
 	if t.Cb == nil {
 		t.Cb = DefaultPipelines

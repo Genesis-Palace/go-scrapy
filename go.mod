@@ -22,5 +22,4 @@ require (
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0
 	gopkg.in/yaml.v2 v2.2.8
-	sourcegraph.com/sourcegraph/go-selenium v0.0.0-20170113155244-3da7d00aac9c
 )
