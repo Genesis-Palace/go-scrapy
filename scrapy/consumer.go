@@ -2,12 +2,24 @@ package scrapy
 
 import (
 	"encoding/binary"
+	"github.com/Shopify/sarama"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/go-redis/redis"
 	"github.com/nsqio/go-nsq"
 )
+
+var (
+	Stop = make(chan os.Signal, 0)
+)
+
+func init() {
+	signal.Notify(Stop, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2)
+}
 
 func DecodeMessage(b []byte) (*nsq.Message, error) {
 	var msg nsq.Message
@@ -22,9 +34,101 @@ type IConsumer interface {
 	Run()
 }
 
+type kafkaConsumer struct {
+	Addrs      []string `yaml:"addrs"`
+	Topic      string   `yaml:"topic"`
+	msgHandler nsq.Handler
+	consumer   sarama.Consumer
+	Limit      int
+	WaitGroupWrap
+}
+
+func (k *kafkaConsumer) HandleMessage(message *nsq.Message) error {
+	log.Debug(string(message.Body))
+	return nil
+}
+
+func (k *kafkaConsumer) SetHandler(handler nsq.Handler) IConsumer {
+	k.msgHandler = handler
+	return k
+}
+
+func (k *kafkaConsumer) Init() {
+	var err error
+	k.consumer, err = sarama.NewConsumer(k.Addrs, nil)
+	if err != nil {
+		panic("new kafka consumer client error :" + err.Error())
+	}
+	log.Debug("kafka consumer init ok")
+}
+
+func (k *kafkaConsumer) IsAvailable() bool {
+	topics, err := k.consumer.Topics()
+	if err != nil {
+		log.Errorf("ERROR: Unable to list kafka topics, err=[%v]", err)
+		return false
+	}
+
+	for i, topic := range topics {
+		log.Debugf("\tTopic[%d]: [%s]\n", i, topic)
+	}
+	return true
+}
+
+func (k *kafkaConsumer) Run() {
+	var ch = make(chan string, 10000)
+	if k.msgHandler == nil {
+		k.SetHandler(k)
+	}
+	k.Add(1)
+	go func() {
+		defer k.Done()
+		for {
+			select {
+			case v := <-Stop:
+				log.Info("consumer is close.", v)
+				break
+			case v := <-ch:
+				msg, err := DecodeMessage([]byte(v))
+				if err != nil {
+					log.Warning(msg)
+					continue
+				}
+				err = k.msgHandler.HandleMessage(msg)
+				if err != nil {
+					log.Warning(err)
+				}
+			default:
+			}
+		}
+	}()
+	partitionList, err := k.consumer.Partitions(k.Topic)
+	if err != nil {
+		panic(err)
+	}
+	for partition := range partitionList {
+		//ConsumePartition方法根据主题，分区和给定的偏移量创建创建了相应的分区消费者
+		//如果该分区消费者已经消费了该信息将会返回error
+		//sarama.OffsetNewest:表明了为最新消息
+		pc, err := k.consumer.ConsumePartition(k.Topic, int32(partition), sarama.OffsetNewest)
+		if err != nil {
+			panic(err)
+		}
+		go func(pc sarama.PartitionConsumer) {
+			//Messages()该方法返回一个消费消息类型的只读通道，由代理产生
+			defer pc.AsyncClose()
+			for msg := range pc.Messages() {
+				ch <- string(msg.Value)
+			}
+		}(pc)
+	}
+	time.Sleep(time.Duration(1000/k.Limit) * time.Millisecond)
+	k.Wait()
+}
+
 type nsqConsumer struct {
 	Urls       []string `json:"urls"`
-	Topic      string   `json:"topic"`
+	Topic      string   `json:"Topic"`
 	Channel    string   `json:"channel"`
 	consumer   *nsq.Consumer
 	msgHandler nsq.Handler

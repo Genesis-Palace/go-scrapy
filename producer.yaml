@@ -15,11 +15,10 @@ kind: go-scrapy
   # channel
 
 broker:
-  redis:
-    host: 127.0.0.1:6379
-    db: 0
-    password: ""
-    topic: test-redis-topic
+  kafka:
+    addrs:
+      - 127.0.0.1:9092
+    topic: test
 
 #  nsq:
 #    urls:
@@ -52,10 +51,15 @@ consumer:
 #    topic: test-consumer-topic
 #    channel: nsq-consumer
 
-  redis:
-    host: 127.0.0.1:6379
-    db: 0
-    password: ""
-    topic: test-redis-broker
-
+#  redis:
+#    host: 127.0.0.1:6379
+#    db: 0
+#    password: ""
+#    topic: test-redis-broker
+#
   limit: 20
+
+  kafka:
+    addrs:
+      - 127.0.0.1:9092
+    topic: test

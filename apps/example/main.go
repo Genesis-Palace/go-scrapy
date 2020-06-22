@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/Genesis-Palace/go-scrapy/scrapy"
 	go_utils "github.com/Genesis-Palace/go-utils"
@@ -32,7 +33,7 @@ func BrokerDemo() {
 		"title":    scrapy.G("head title"),
 		"abstract": scrapy.R("abstract: '(.*?)'"),
 	})
-	scrapy.NewCrawler(url, item).SetTimeOut(1).SetParser(parser).Do()
+	scrapy.NewCrawler(url, item).SetTimeOut(5).SetParser(parser).Do()
 	if item.Empty() {
 		log.Error(errors.New("item is empty."))
 		return
@@ -80,6 +81,7 @@ func ReadYamlFileCreatedCrawler() {
 	}
 }
 
+// Handler: redisConsumer message handler
 type Handler struct{}
 
 func (h *Handler) HandleMessage(msg *nsq.Message) error {
@@ -161,8 +163,9 @@ func main() {
 	//GetHtml()
 	//wg.Wait()
 	//// 增加jsonparser基础实现, 将response.Html转成map 并写入item中. 解析由开发者自定义即可
-	NewToutiaoCrawlerJsonParser()
-	//NewSoHuNewsJsonParser()
+	//NewToutiaoCrawlerJsonParser()
+	//NewSoHuNewsJSONParser()
+	NewKafkaConsumerTest()
 }
 
 func NewToutiaoCrawlerJsonParser() {
@@ -175,7 +178,7 @@ func NewToutiaoCrawlerJsonParser() {
 	log.Debug(item)
 }
 
-func NewSoHuNewsJsonParser() {
+func NewSoHuNewsJSONParser() {
 	//go_utils.SetLogLevel("DEBUG")
 	var url scrapy.String = "https://apiv2.sohu.com/api/topic/load?callback=&page_size=10&topic_source_id=mp_392096309&page_no=1&hot_size=5&media_id=267106&topic_category_id=8&topic_title=%E4%B8%AD%E5%85%B1%E4%B8%AD%E5%A4%AE%E6%94%BF%E6%B2%BB%E5%B1%80%E5%B8%B8%E5%8A%A1%E5%A7%94%E5%91%98%E4%BC%9A%E5%8F%AC%E5%BC%80%E4%BC%9A%E8%AE%AE%E4%B9%A0%E8%BF%91%E5%B9%B3%E4%B8%BB%E6%8C%81&topic_url=https%3A%2F%2Fwww.sohu.com%2Fa%2F392096309_267106%3Fcode%3D59d2c479cc76988d098d8b3251ed61c4&source_id=mp_392096309&_=1588211540064"
 	var item = scrapy.NewMap()
@@ -183,4 +186,27 @@ func NewSoHuNewsJsonParser() {
 	for key, value := range item.Get("jsonObject").(map[string]interface{}) {
 		log.Info(key, value)
 	}
+}
+
+type KafkaHandler struct{}
+
+func (k KafkaHandler) HandleMessage(message *nsq.Message) error {
+	log.Info(scrapy.String(message.Body))
+	return nil
+}
+
+func NewKafkaConsumerTest() {
+	go func() {
+		opt, err := scrapy.NewOptions("producer.yaml")
+		if err != nil {
+			panic(err)
+		}
+		scrapy.NewKafkaConsumer(opt.Consumer).SetHandler(KafkaHandler{}).Run()
+	}()
+	broker := scrapy.NewKafkaBroker([]string{"127.0.0.1:9092"}, "test")
+	var url scrapy.String = "https://apiv2.sohu.com/api/topic/load?callback=&page_size=10&topic_source_id=mp_392096309&page_no=1&hot_size=5&media_id=267106&topic_category_id=8&topic_title=%E4%B8%AD%E5%85%B1%E4%B8%AD%E5%A4%AE%E6%94%BF%E6%B2%BB%E5%B1%80%E5%B8%B8%E5%8A%A1%E5%A7%94%E5%91%98%E4%BC%9A%E5%8F%AC%E5%BC%80%E4%BC%9A%E8%AE%AE%E4%B9%A0%E8%BF%91%E5%B9%B3%E4%B8%BB%E6%8C%81&topic_url=https%3A%2F%2Fwww.sohu.com%2Fa%2F392096309_267106%3Fcode%3D59d2c479cc76988d098d8b3251ed61c4&source_id=mp_392096309&_=1588211540064"
+	var item = scrapy.NewMap()
+	_, _ = scrapy.NewCrawler(url, item).SetTimeOut(5).SetParser(scrapy.NewJsonParser()).Do()
+	broker.Add(item)
+	time.Sleep(time.Second)
 }

@@ -6,6 +6,7 @@ require (
 	github.com/Genesis-Palace/go-utils v0.0.0-20200417032925-d347b9df2c32
 	github.com/Genesis-Palace/requests v0.0.0-20191011101224-852e65f16285
 	github.com/PuerkitoBio/goquery v1.5.1
+	github.com/Shopify/sarama v1.26.4
 	github.com/andybalholm/cascadia v1.2.0 // indirect
 	github.com/axgle/mahonia v0.0.0-20180208002826-3358181d7394
 	github.com/go-playground/universal-translator v0.17.0 // indirect
@@ -16,7 +17,7 @@ require (
 	github.com/onsi/ginkgo v1.12.0 // indirect
 	github.com/onsi/gomega v1.9.0 // indirect
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7 // indirect
-	github.com/tebeka/selenium v0.9.9
+	github.com/tebeka/selenium v0.9.9 // indirect
 	github.com/ymzuiku/hit v0.0.0-20190525155149-18097f1d08f4
 	golang.org/x/net v0.0.0-20200506145744-7e3656a0809f
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect

@@ -187,8 +187,8 @@ type Response struct {
 
 func NewRequest(url String, args ...interface{}) *Requests {
 	var req = &Requests{
-		Url:     url,
-		c:       NewDefaultClient(),
+		Url: url,
+		c:   NewDefaultClient(),
 	}
 	for _, arg := range args {
 		switch v := arg.(type) {
@@ -210,7 +210,7 @@ func NewRequest(url String, args ...interface{}) *Requests {
 
 func NewDefaultClient() IClient {
 	return &DefaultClient{
-		c:       requests.Requests(),
+		c: requests.Requests(),
 	}
 }
 
@@ -218,6 +218,6 @@ func newProxyClient(c *http.Client) IClient {
 	client := requests.Requests()
 	client.Client = c
 	return &ProxyClient{
-		c:       client,
+		c: client,
 	}
 }

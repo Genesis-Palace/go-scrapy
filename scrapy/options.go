@@ -11,6 +11,7 @@ import (
 
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/Genesis-Palace/requests"
+	"github.com/Shopify/sarama"
 	"github.com/go-redis/redis"
 	"github.com/goinggo/mapstructure"
 	"gopkg.in/yaml.v2"
@@ -28,8 +29,10 @@ type IBroker interface {
 type Broker struct {
 	NsqBroker   *NsqBroker   `yaml:"nsq" json:"nsq_broker"`
 	RedisBroker *RedisBroker `yaml:"redis" json:"redis_broker"`
+	KafkaBroker *KafkaBroker `yaml:"kafka" json:"kafka_broker"`
 	Nsq         bool         `yaml:"__nsq" json:"nsq"`
 	Rds         bool         `yaml:"__rds" json:"rds"`
+	Kfk         bool         `yaml:"__kafka" json:"kafka"`
 }
 
 func (b *Broker) Init() {
@@ -41,6 +44,10 @@ func (b *Broker) Init() {
 		b.NsqBroker.Init()
 		b.Nsq = true
 	}
+	if Validated(b.KafkaBroker) {
+		b.KafkaBroker.Init()
+		b.Kfk = true
+	}
 }
 
 func (b *Broker) Add(item IItem) bool {
@@ -49,6 +56,8 @@ func (b *Broker) Add(item IItem) bool {
 		b.RedisBroker.Add(item)
 	case Validated(b.NsqBroker):
 		b.NsqBroker.Add(item)
+	case Validated(b.KafkaBroker):
+		b.KafkaBroker.Add(item)
 	default:
 		return false
 	}
@@ -122,6 +131,7 @@ type Options struct {
 type Consumer struct {
 	Nsq   *nsqConsumer
 	Redis *RedisConsumer
+	Kafka *kafkaConsumer
 	Limit int
 }
 
@@ -200,7 +210,7 @@ func (o *Options) Dumps() (string, error) {
 
 type NsqBroker struct {
 	Urls    []string `json:"urls" validate:"required"`
-	Topic   string   `json:"topic" validate:"required"`
+	Topic   string   `json:"Topic" validate:"required"`
 	Channel string   `json:"channel" validate:"required"`
 	c       *requests.Request
 	pushUrl string
@@ -214,6 +224,16 @@ func NewNsqConsumer(opt *Consumer) *nsqConsumer {
 		Channel: opt.Nsq.Channel,
 		Limit:   opt.Limit,
 	}
+}
+
+func NewKafkaConsumer(opt *Consumer) *kafkaConsumer {
+	kafka := &kafkaConsumer{
+		Addrs: opt.Kafka.Addrs,
+		Topic: opt.Kafka.Topic,
+		Limit: opt.Limit,
+	}
+	kafka.Init()
+	return kafka
 }
 
 func NewRedisConsumer(opt *Consumer) *RedisConsumer {
@@ -240,13 +260,13 @@ func randomNsqUrl(v []string) interface{} {
 func (n *NsqBroker) Init() {
 	Once(func() {
 		n.c = requests.NewRequest()
-		log.Infof("nsqd broker inited. host: %s, topic: %s", n.getPushTopicUrl(), n.Topic)
+		log.Infof("nsqd broker inited. host: %s, Topic: %s", n.getPushTopicUrl(), n.Topic)
 	})
 }
 
 func (n *NsqBroker) getPushTopicUrl() string {
 	var params = url.Values{}
-	params.Add("topic", n.Topic)
+	params.Add("Topic", n.Topic)
 	n.pushUrl = strings.Join([]string{randomNsqUrl(n.Urls).(string), params.Encode()}, "")
 	return n.pushUrl
 }
@@ -270,11 +290,52 @@ func (n *NsqBroker) Add(item IItem) bool {
 	return true
 }
 
+type KafkaBroker struct {
+	Addrs    []string `json:"addrs"`
+	opts     *sarama.Config
+	Topic    string `json:"topic"`
+	producer sarama.AsyncProducer
+	sync.WaitGroup
+}
+
+func NewKafkaBroker(addrs []string, topic string) *KafkaBroker {
+	k := &KafkaBroker{
+		Addrs: addrs,
+		Topic: topic,
+	}
+	k.Init()
+	return k
+}
+
+func (k *KafkaBroker) Init() {
+	var err error
+	k.opts = sarama.NewConfig()
+	k.opts.Producer.RequiredAcks = sarama.WaitForAll
+	k.opts.Producer.Partitioner = sarama.NewRandomPartitioner
+	k.producer, err = sarama.NewAsyncProducer(k.Addrs, k.opts)
+	if err != nil {
+		panic("new kafka producer client error :" + err.Error())
+	}
+}
+
+func (k *KafkaBroker) Add(item IItem) bool {
+	doc, err := item.Dumps()
+	if err != nil {
+		return false
+	}
+	msg := &sarama.ProducerMessage{
+		Topic: k.Topic,
+		Value: sarama.ByteEncoder(doc.String()),
+	}
+	k.producer.Input() <- msg
+	return true
+}
+
 type RedisBroker struct {
 	Host     string `json:"host" validate:"required"`
 	Password string `json:"password"`
 	Db       int    `json:"db"`
-	Topic    string `json:"topic" validate:"required"`
+	Topic    string `json:"Topic" validate:"required"`
 	c        *redis.Client
 	WaitGroupWrap
 }

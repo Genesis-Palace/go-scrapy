@@ -2,10 +2,11 @@ package test
 
 import (
 	"fmt"
-	crawler "github.com/Genesis-Palace/go-scrapy/scrapy"
 	"path/filepath"
 	"testing"
 	"time"
+
+	crawler "github.com/Genesis-Palace/go-scrapy/scrapy"
 )
 
 func TestNewMap(t *testing.T) {
