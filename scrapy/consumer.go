@@ -1,7 +1,6 @@
 package scrapy
 
 import (
-	"encoding/binary"
 	"github.com/Shopify/sarama"
 	"os"
 	"os/signal"
@@ -28,8 +27,7 @@ func init() {
 
 func DecodeMessage(b []byte) (*nsq.Message, error) {
 	var msg nsq.Message
-	msg.Timestamp = int64(binary.BigEndian.Uint64(b[:8]))
-	msg.Attempts = binary.BigEndian.Uint16(b[8:10])
+	msg.Timestamp = time.Now().Unix()
 	msg.Body = b
 	return &msg, nil
 }
