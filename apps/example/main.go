@@ -3,8 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"time"
-
 	"github.com/Genesis-Palace/go-scrapy/scrapy"
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/nsqio/go-nsq"
@@ -182,7 +180,7 @@ func NewSoHuNewsJSONParser() {
 	//go_utils.SetLogLevel("DEBUG")
 	var url scrapy.String = "https://apiv2.sohu.com/api/topic/load?callback=&page_size=10&topic_source_id=mp_392096309&page_no=1&hot_size=5&media_id=267106&topic_category_id=8&topic_title=%E4%B8%AD%E5%85%B1%E4%B8%AD%E5%A4%AE%E6%94%BF%E6%B2%BB%E5%B1%80%E5%B8%B8%E5%8A%A1%E5%A7%94%E5%91%98%E4%BC%9A%E5%8F%AC%E5%BC%80%E4%BC%9A%E8%AE%AE%E4%B9%A0%E8%BF%91%E5%B9%B3%E4%B8%BB%E6%8C%81&topic_url=https%3A%2F%2Fwww.sohu.com%2Fa%2F392096309_267106%3Fcode%3D59d2c479cc76988d098d8b3251ed61c4&source_id=mp_392096309&_=1588211540064"
 	var item = scrapy.NewMap()
-	_, _ = scrapy.NewCrawler(url, item).SetParser(scrapy.NewJsonParser()).Do()
+	_, _ = scrapy.NewCrawler(url, item).SetTimeOut(5).SetParser(scrapy.NewJsonParser()).Do()
 	for key, value := range item.Get("jsonObject").(map[string]interface{}) {
 		log.Info(key, value)
 	}
@@ -196,7 +194,10 @@ func (k KafkaHandler) HandleMessage(message *nsq.Message) error {
 }
 
 func NewKafkaConsumerTest() {
+	var wg scrapy.WaitGroupWrap
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		opt, err := scrapy.NewOptions("producer.yaml")
 		if err != nil {
 			panic(err)
@@ -208,5 +209,5 @@ func NewKafkaConsumerTest() {
 	var item = scrapy.NewMap()
 	_, _ = scrapy.NewCrawler(url, item).SetTimeOut(5).SetParser(scrapy.NewJsonParser()).Do()
 	broker.Add(item)
-	time.Sleep(time.Second)
+	wg.Wait()
 }

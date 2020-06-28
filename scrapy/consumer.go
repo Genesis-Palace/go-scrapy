@@ -19,6 +19,11 @@ var (
 
 func init() {
 	signal.Notify(Stop, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2)
+	go func() {
+		v := <-Stop
+		log.Info("consumer is close.", v)
+		os.Exit(0)
+	}()
 }
 
 func DecodeMessage(b []byte) (*nsq.Message, error) {
@@ -85,9 +90,6 @@ func (k *kafkaConsumer) Run() {
 		defer k.Done()
 		for {
 			select {
-			case v := <-Stop:
-				log.Info("consumer is close.", v)
-				break
 			case v := <-ch:
 				msg, err := DecodeMessage([]byte(v))
 				if err != nil {
@@ -99,6 +101,7 @@ func (k *kafkaConsumer) Run() {
 					log.Warning(err)
 				}
 			default:
+				time.Sleep(time.Second)
 			}
 		}
 	}()
@@ -122,7 +125,6 @@ func (k *kafkaConsumer) Run() {
 			}
 		}(pc)
 	}
-	time.Sleep(time.Duration(1000/k.Limit) * time.Millisecond)
 	k.Wait()
 }
 
