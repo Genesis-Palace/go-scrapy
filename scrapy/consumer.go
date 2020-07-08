@@ -113,7 +113,8 @@ func (k *kafkaConsumer) Run() {
 		//sarama.OffsetNewest:表明了为最新消息
 		pc, err := k.consumer.ConsumePartition(k.Topic, int32(partition), sarama.OffsetNewest)
 		if err != nil {
-			panic(err)
+			log.Error(err)
+			continue
 		}
 		go func(pc sarama.PartitionConsumer) {
 			//Messages()该方法返回一个消费消息类型的只读通道，由代理产生
