@@ -2,13 +2,15 @@ package scrapy
 
 import (
 	"fmt"
+	"gopkg.in/mgo.v2"
+	"math/rand"
+	"sync"
+	"time"
+
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/go-bongo/bongo"
 	"github.com/go-redis/redis"
 	"gopkg.in/mgo.v2/bson"
-	"math/rand"
-	"sync"
-	"time"
 )
 
 type MongoClient struct {
@@ -36,6 +38,14 @@ func (m *MongoClient) Add(doc bongo.Document) bool {
 		return false
 	}
 	return nil == c.Collection(<-m.colCh).Save(doc)
+}
+
+func (m *MongoClient) Pipe(args ...bson.M) *mgo.Pipe {
+	c := m.instance()
+	if c == nil {
+		return nil
+	}
+	return c.Session.DB(c.Config.Database).C(<-m.colCh).Pipe(args)
 }
 
 func (m *MongoClient) Collection(col string) *MongoClient {
@@ -167,10 +177,7 @@ func (r *RedisClient) Incr(key string) int64 {
 
 func (r *RedisClient) Existed(key string) bool {
 	_, err := r.Instance().Get(key).Int()
-	if err == redis.Nil {
-		return false
-	}
-	return true
+	return err != nil
 }
 
 func (r *RedisClient) SIsMember(key, id string) bool {
