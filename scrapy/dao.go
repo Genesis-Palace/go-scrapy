@@ -1,10 +1,10 @@
 package scrapy
 
 import (
+	"errors"
 	"fmt"
 	"gopkg.in/mgo.v2"
 	"math/rand"
-	"sync"
 	"time"
 
 	go_utils "github.com/Genesis-Palace/go-utils"
@@ -17,7 +17,6 @@ type MongoClient struct {
 	config     []*bongo.Config
 	connection []*bongo.Connection
 	colCh      chan string
-	sync.RWMutex
 }
 
 func (m *MongoClient) instance() *bongo.Connection {
@@ -40,12 +39,12 @@ func (m *MongoClient) Add(doc bongo.Document) bool {
 	return nil == c.Collection(<-m.colCh).Save(doc)
 }
 
-func (m *MongoClient) Pipe(args ...bson.M) *mgo.Pipe {
+func (m *MongoClient) Count(m2 bson.M) (int, error) {
 	c := m.instance()
 	if c == nil {
-		return nil
+		return 0, nil
 	}
-	return c.Session.DB(c.Config.Database).C(<-m.colCh).Pipe(args)
+	return c.Session.DB(c.Config.Database).C(<-m.colCh).Count()
 }
 
 func (m *MongoClient) Collection(col string) *MongoClient {
@@ -53,15 +52,16 @@ func (m *MongoClient) Collection(col string) *MongoClient {
 	return m
 }
 
-func (m *MongoClient) FindOne(query interface{}, result interface{}) {
+func (m *MongoClient) FindOne(query interface{}, result interface{}) error {
 	c := m.instance()
 	if c == nil {
-		return
+		return errors.New("collection is nil")
 	}
 	err := c.Collection(<-m.colCh).FindOne(query, &result)
 	if err != nil {
 		log.Error(err)
 	}
+	return err
 }
 
 func (m *MongoClient) Remove(query bson.M) bool {
@@ -97,9 +97,15 @@ func (m *MongoClient) Find(query interface{}) *bongo.ResultSet {
 	return c.Collection(<-m.colCh).Find(query)
 }
 
+func (m *MongoClient) Pipe(args ...bson.M) *mgo.Pipe {
+	c := m.instance()
+	if c == nil {
+		return nil
+	}
+	return c.Session.DB(c.Config.Database).C(<-m.colCh).Pipe(args)
+}
+
 func (m *MongoClient) Init() {
-	m.Lock()
-	defer m.Unlock()
 	for _, conf := range m.config {
 		connection, err := bongo.Connect(conf)
 		if err != nil {

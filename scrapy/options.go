@@ -148,6 +148,8 @@ func NewNext(arg ...interface{}) (*Next, error) {
 			next := &Next{
 				G: make(map[string]string),
 				R: make(map[string]string),
+				T: make(map[string]string),
+				A: make(map[string]*ParserResult),
 			}
 			err := next.Load(v)
 			if err != nil {
@@ -165,6 +167,7 @@ type Next struct {
 	G map[string]string
 	R map[string]string
 	T map[string]string
+	A map[string]*ParserResult
 }
 
 func (n *Next) Load(m map[string]interface{}) error {
@@ -185,6 +188,10 @@ func (n *Next) MergeGr() (result Pattern) {
 
 	for k, v := range n.T {
 		result[k] = T(v)
+	}
+	for k, v := range n.A {
+		// v.Key 对应html中指定的元素 如果指定 .next-title元素 v.Value指定对应需要获取的attrib名字
+		result[k] = A(_A(v.Key), v.Value.(string))
 	}
 	return result
 }

@@ -83,6 +83,12 @@ func (d *DefaultClient) PostJson(url, js String, args ...interface{}) (*requests
 	return d.c.PostJson(url.String(), js.String(), args)
 }
 
+func (d *DefaultClient) PostBinary(url, js String, args ...interface{}) (*requests.Response, error) {
+	d.Lock()
+	defer d.Unlock()
+	return d.c.PostJson(url.String(), js.String(), args)
+}
+
 func (d *DefaultClient) SetHeaders(header requests.Header) {
 	for k, v := range header {
 		d.c.Header.Add(k, v)
@@ -120,7 +126,6 @@ func (p *ProxyClient) PostJson(url, js String, args ...interface{}) (*requests.R
 
 type Requests struct {
 	Url     String
-	headers requests.Header
 	cookies *http.Cookie
 	method  String
 	timeout time.Duration

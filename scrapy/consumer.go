@@ -1,11 +1,12 @@
 package scrapy
 
 import (
-	"github.com/Shopify/sarama"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/Shopify/sarama"
 
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/go-redis/redis"
@@ -13,7 +14,7 @@ import (
 )
 
 var (
-	Stop = make(chan os.Signal, 0)
+	Stop = make(chan os.Signal, 1)
 )
 
 func init() {
@@ -94,10 +95,12 @@ func (k *kafkaConsumer) Run() {
 					log.Warning(msg)
 					continue
 				}
-				err = k.msgHandler.HandleMessage(msg)
-				if err != nil {
-					log.Warning(err)
-				}
+				go func(msg *nsq.Message) {
+					err = k.msgHandler.HandleMessage(msg)
+					if err != nil {
+						log.Warning(err)
+					}
+				}(msg)
 			default:
 				time.Sleep(time.Second)
 			}
@@ -220,10 +223,12 @@ func (r *RedisConsumer) Run() {
 			log.Warning(msg)
 			continue
 		}
-		err = r.f.HandleMessage(msg)
-		if err != nil {
-			log.Error(err)
-		}
+		go func(msg *nsq.Message) {
+			err := r.f.HandleMessage(msg)
+			if err != nil {
+				log.Debug(err)
+			}
+		}(msg)
 		time.Sleep(time.Duration(1000/r.Limit) * time.Millisecond)
 	}
 }
