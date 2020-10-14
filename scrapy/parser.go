@@ -53,7 +53,11 @@ func (g *GoQueryAttribParser) Parser(html String, item IItem, sss ...string) (II
 	}
 	doc.Find(g.pattern.String()).Each(func(i int, selection *goquery.Selection) {
 		if v, ok := selection.Attr(g.attrib); ok {
-			item.Add(NewPr(g.attrib, v))
+			if len(sss) == 0 {
+				item.Add(NewPr(g.attrib, v))
+			} else {
+				item.Add(NewPr(sss[0], v))
+			}
 		}
 	})
 	return item, true
