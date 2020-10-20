@@ -18,7 +18,7 @@ var (
 )
 
 func init() {
-	signal.Notify(Stop, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGUSR1, syscall.SIGUSR2)
+	signal.Notify(Stop, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	go func() {
 		v := <-Stop
 		log.Info("consumer is close.", v)
