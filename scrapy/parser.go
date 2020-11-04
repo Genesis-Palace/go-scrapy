@@ -251,6 +251,7 @@ func (m *MixedParser) Parser(html String, item IItem, s ...string) (i IItem, ret
 			log.Debug(k)
 			continue
 		}
+		res.Encode(m.encoding)
 		res.Parser(html, item, k)
 	}
 	return
