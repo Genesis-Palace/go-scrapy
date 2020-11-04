@@ -2,6 +2,7 @@ package scrapy
 
 import (
 	"net/http"
+	"regexp"
 	"sync"
 	"time"
 
@@ -69,7 +70,8 @@ func (t *Crawler) Do() (*Crawler, error) {
 		t.ipRecovery(err)
 		return t, err
 	}
-	t.html = String(res.Content())
+
+	t.html = clearHTML(res.Text())
 	t.Parser.Parser(t.html, t.Item)
 	if t.Cb == nil {
 		t.Cb = DefaultPipelines
@@ -141,4 +143,11 @@ func NewProxyCrawler(url String, args ...interface{}) *Crawler {
 		}
 	}
 	return c
+}
+
+// 去除html中的注释标签
+func clearHTML(html string) String {
+	re, _ := regexp.Compile("<!--.*?-->")
+	html = re.ReplaceAllString(html, "\n")
+	return String(html)
 }
