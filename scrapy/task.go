@@ -71,7 +71,7 @@ func (t *Crawler) Do() (*Crawler, error) {
 		return t, err
 	}
 
-	t.html = clearHTML(res.Text())
+	t.html = String(res.Content())
 	t.Parser.Parser(t.html, t.Item)
 	if t.Cb == nil {
 		t.Cb = DefaultPipelines

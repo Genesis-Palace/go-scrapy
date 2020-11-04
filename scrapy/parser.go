@@ -37,8 +37,14 @@ func A(pattern _A, attrib string) *GoQueryAttribParser {
 type GoQueryAttribParser struct {
 	pattern String
 	DefaultParser
-	Result *List
-	attrib string
+	Result   *List
+	attrib   string
+	encoding string
+}
+
+func (g *GoQueryAttribParser) Encode(s string) IParser {
+	g.encoding = s
+	return g
 }
 
 func (g *GoQueryAttribParser) Validate() bool {
@@ -46,7 +52,7 @@ func (g *GoQueryAttribParser) Validate() bool {
 }
 
 func (g *GoQueryAttribParser) Parser(html String, item IItem, sss ...string) (IItem, bool) {
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(AutoGetHtmlEncode(html.String())))
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(AutoGetHtmlEncode(html.String(), g.encoding)))
 	if err != nil {
 		log.Error(err)
 		return item, false
@@ -76,6 +82,7 @@ type IParser interface {
 	Validate() bool
 	Load(i IItem)
 	Parser(string2 String, i IItem, string3 ...string) (IItem, bool)
+	Encode(string) IParser
 }
 
 type DefaultParser struct {
@@ -103,15 +110,20 @@ type GoQueryTextParser struct {
 	Html    string
 	pattern String
 	DefaultParser
+	encoding string
+}
+
+func (g *GoQueryTextParser) Encode(s string) IParser {
+	g.encoding = s
+	return g
 }
 
 func (g *GoQueryTextParser) Parser(html String, item IItem, sss ...string) (IItem, bool) {
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(AutoGetHtmlEncode(html.String())))
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(AutoGetHtmlEncode(html.String(), g.encoding)))
 	if err != nil {
-		log.Error(err)
 		return item, false
 	}
-	texts := []string{}
+	var texts []string
 	doc.Find(g.pattern.String()).Each(func(i int, selection *goquery.Selection) {
 		texts = append(texts, strings.TrimSpace(selection.Text()))
 	})
@@ -128,10 +140,16 @@ type GoQueryParser struct {
 	Html    string
 	pattern String
 	DefaultParser
+	encoding string
+}
+
+func (g *GoQueryParser) Encode(s string) IParser {
+	g.encoding = s
+	return g
 }
 
 func (g *GoQueryParser) Parser(html String, item IItem, sss ...string) (IItem, bool) {
-	doc, err := goquery.NewDocumentFromReader(strings.NewReader(AutoGetHtmlEncode(html.String())))
+	doc, err := goquery.NewDocumentFromReader(strings.NewReader(AutoGetHtmlEncode(html.String(), g.encoding)))
 	if err != nil {
 		log.Error(err)
 		return item, false
@@ -175,7 +193,13 @@ func NewGoQueryTextParser(pattern T) *GoQueryTextParser {
 
 type JsonParser struct {
 	DefaultParser
-	Html string
+	Html     string
+	encoding string
+}
+
+func (r *JsonParser) Encode(s string) IParser {
+	r.encoding = s
+	return r
 }
 
 func (r *JsonParser) Parser(htm String, interfaceI IItem, s ...string) (i IItem, ret bool) {
@@ -197,6 +221,12 @@ func NewJsonParser() *JsonParser {
 type MixedParser struct {
 	pattern Pattern
 	DefaultParser
+	encoding string
+}
+
+func (m *MixedParser) Encode(s string) IParser {
+	m.encoding = s
+	return m
 }
 
 func NewMixdParser(pattern Pattern) *MixedParser {
@@ -230,11 +260,17 @@ type RegexParser struct {
 	Html    string
 	Pattern String
 	DefaultParser
+	encoding string
+}
+
+func (r *RegexParser) Encode(s string) IParser {
+	r.encoding = s
+	return r
 }
 
 func (r *RegexParser) Parser(htm String, interfaceI IItem, s ...string) (i IItem, ret bool) {
 	key := newKey(htm, s...)
-	var result = Regex(AutoGetHtmlEncode(htm.String()), r.Pattern.String())
+	var result = Regex(AutoGetHtmlEncode(htm.String(), r.encoding), r.Pattern.String())
 	if len(result) == 0 {
 		return
 	}
