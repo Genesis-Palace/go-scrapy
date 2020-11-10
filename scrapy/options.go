@@ -140,6 +140,8 @@ func NewNext(arg ...interface{}) (*Next, error) {
 		return &Next{
 			G: make(map[string]string),
 			R: make(map[string]string),
+			T: make(map[string]string),
+			A: make(map[string]ParserResult),
 		}, nil
 	}
 	for _, a := range arg {
@@ -149,7 +151,7 @@ func NewNext(arg ...interface{}) (*Next, error) {
 				G: make(map[string]string),
 				R: make(map[string]string),
 				T: make(map[string]string),
-				A: make(map[string]*ParserResult),
+				A: make(map[string]ParserResult),
 			}
 			err := next.Load(v)
 			if err != nil {
@@ -164,10 +166,10 @@ func NewNext(arg ...interface{}) (*Next, error) {
 }
 
 type Next struct {
-	G map[string]string
-	R map[string]string
-	T map[string]string
-	A map[string]*ParserResult
+	G map[string]string       `json:"g"bson:"g"`
+	R map[string]string       `json:"r"bson:"r"`
+	T map[string]string       `json:"t"bson:"t"`
+	A map[string]ParserResult `json:"a" bson:"a"`
 }
 
 func (n *Next) Load(m map[string]interface{}) error {

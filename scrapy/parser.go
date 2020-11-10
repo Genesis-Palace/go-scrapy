@@ -70,8 +70,8 @@ func (g *GoQueryAttribParser) Parser(html String, item IItem, sss ...string) (II
 }
 
 type ParserResult struct {
-	Key   string
-	Value interface{}
+	Key   string      `bson:"key"`
+	Value interface{} `bson:"value"`
 }
 
 func (p *ParserResult) String() string {

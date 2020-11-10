@@ -36,7 +36,7 @@ func (s *String) HasPrefix(pattern string) bool {
 }
 
 func (s *String) Empty() bool {
-	return *s == ""
+	return strings.TrimSpace(s.String()) == ""
 }
 
 type Map struct {
@@ -69,6 +69,10 @@ func (m *Map) Pop(s String) interface{} {
 func (m *Map) Add(v interface{}) {
 	m.Lock()
 	switch t := v.(type) {
+	case *Map:
+		for key, value := range t.Items() {
+			m.m[key] = value
+		}
 	case map[string]string:
 		for key, value := range t {
 			m.m[String(key)] = value

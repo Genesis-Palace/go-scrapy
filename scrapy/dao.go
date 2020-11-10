@@ -36,7 +36,12 @@ func (m *MongoClient) Add(doc bongo.Document) bool {
 	if c == nil {
 		return false
 	}
-	return nil == c.Collection(<-m.colCh).Save(doc)
+	var err error
+	err = c.Collection(<-m.colCh).Save(doc)
+	if err != nil {
+		log.Error(err)
+	}
+	return err == nil
 }
 
 func (m *MongoClient) Count(m2 bson.M) (int, error) {
