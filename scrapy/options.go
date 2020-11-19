@@ -275,7 +275,7 @@ func (n *NsqBroker) Init() {
 
 func (n *NsqBroker) getPushTopicUrl() string {
 	var params = url.Values{}
-	params.Add("Topic", n.Topic)
+	params.Add("topic", n.Topic)
 	n.pushUrl = strings.Join([]string{randomNsqUrl(n.Urls).(string), params.Encode()}, "")
 	return n.pushUrl
 }
