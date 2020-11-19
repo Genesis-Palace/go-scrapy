@@ -219,7 +219,7 @@ func (o *Options) Dumps() (string, error) {
 
 type NsqBroker struct {
 	Urls    []string `json:"urls" validate:"required"`
-	Topic   string   `json:"Topic" validate:"required"`
+	Topic   string   `json:"topic" validate:"required"`
 	Channel string   `json:"channel" validate:"required"`
 	c       *requests.Request
 	pushUrl string
