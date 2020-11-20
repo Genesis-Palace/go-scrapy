@@ -31,17 +31,12 @@ func (m *MongoClient) instance() *bongo.Connection {
 	return m.connection[randn]
 }
 
-func (m *MongoClient) Add(doc bongo.Document) bool {
+func (m *MongoClient) Add(doc bongo.Document) error {
 	c := m.instance()
 	if c == nil {
-		return false
+		return errors.New("collection is empty.")
 	}
-	var err error
-	err = c.Collection(<-m.colCh).Save(doc)
-	if err != nil {
-		log.Error(err)
-	}
-	return err == nil
+	return c.Collection(<-m.colCh).Save(doc)
 }
 
 func (m *MongoClient) Count(m2 bson.M) (int, error) {

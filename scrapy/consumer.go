@@ -150,7 +150,7 @@ func (n *nsqConsumer) Run() {
 		waiter.Wrap(func() {
 			defer waiter.Done()
 			cfg := nsq.NewConfig()
-			cfg.MaxInFlight = 1
+			cfg.MaxInFlight = 2000
 			n.consumer, err = nsq.NewConsumer(n.Topic, n.Channel, cfg)
 			if nil != err {
 				return
