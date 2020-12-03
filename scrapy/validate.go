@@ -16,14 +16,37 @@ func Validated(s interface{}) bool {
 	return err == nil
 }
 
+type RegexItems []RegexItem
+
+type RegexItem struct {
+	key interface{}
+	val interface{}
+}
+
+func (r *RegexItem) StringVal() string {
+	v, ok := r.val.(string)
+	if ok {
+		return v
+	}
+	return ""
+}
+
+func (r RegexItems) First() string {
+	return r[0].StringVal()
+}
+
 // RegexParse : 通过正则表达式提取 html中的指定 regex 元素
-func Regex(html, rex string) [][]string {
+func Regex(html, rex string) RegexItems {
 	regex := regexp.MustCompile(rex)
 	find := regex.FindAllStringSubmatch(html, -1)
 	if len(find) == 0 || len(find[0]) <= 1 {
-		return [][]string{}
+		return RegexItems{}
 	}
-	return find
+	var regexItems RegexItems
+	for _, item := range find {
+		regexItems = append(regexItems, RegexItem{item[0], item[1]})
+	}
+	return regexItems
 }
 
 func AutoGetHtmlEncode(html string, encode string) string {
