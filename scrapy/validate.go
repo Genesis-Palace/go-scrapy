@@ -23,7 +23,7 @@ func Regex(html, rex string) []string {
 	if len(find) == 0 || len(find[0]) <= 1 {
 		return []string{}
 	}
-	return []string{find[0][1]}
+	return find[0]
 }
 
 func AutoGetHtmlEncode(html string, encode string) string {
