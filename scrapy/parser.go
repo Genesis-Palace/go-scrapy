@@ -8,7 +8,6 @@ import (
 
 	go_utils "github.com/Genesis-Palace/go-utils"
 	"github.com/PuerkitoBio/goquery"
-	"golang.org/x/net/html"
 )
 
 var log = go_utils.Log()
@@ -275,7 +274,7 @@ func (r *RegexParser) Parser(htm String, interfaceI IItem, s ...string) (i IItem
 	if len(result) == 0 {
 		return
 	}
-	pr := NewPr(key, html.UnescapeString((result[0])))
+	pr := NewPr(key, result)
 	interfaceI.Add(pr)
 	ret = true
 	return
@@ -283,7 +282,7 @@ func (r *RegexParser) Parser(htm String, interfaceI IItem, s ...string) (i IItem
 
 func newKey(html String, s ...string) string {
 	if len(s) == 0 {
-		return html.Hash()
+		return "scrapy.regex.parser"
 	}
 	return s[0]
 }
