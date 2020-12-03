@@ -17,13 +17,13 @@ func Validated(s interface{}) bool {
 }
 
 // RegexParse : 通过正则表达式提取 html中的指定 regex 元素
-func Regex(html, rex string) []string {
+func Regex(html, rex string) [][]string {
 	regex := regexp.MustCompile(rex)
 	find := regex.FindAllStringSubmatch(html, -1)
 	if len(find) == 0 || len(find[0]) <= 1 {
 		return []string{}
 	}
-	return find[0]
+	return find
 }
 
 func AutoGetHtmlEncode(html string, encode string) string {
