@@ -21,7 +21,7 @@ func Regex(html, rex string) [][]string {
 	regex := regexp.MustCompile(rex)
 	find := regex.FindAllStringSubmatch(html, -1)
 	if len(find) == 0 || len(find[0]) <= 1 {
-		return []string{}
+		return [][]string{}
 	}
 	return find
 }
