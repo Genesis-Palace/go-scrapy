@@ -3,6 +3,7 @@ package scrapy
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/elliotchance/pie/pie"
 	"strings"
 	"sync"
 
@@ -128,9 +129,9 @@ func (g *GoQueryTextParser) Parser(html String, item IItem, sss ...string) (IIte
 	})
 	switch len(sss) > 0 {
 	case true:
-		item.Add(NewPr(sss[0], strings.Join(texts, ",")))
+		item.Add(NewPr(sss[0], pie.Strings{strings.Join(texts, ",")}))
 	default:
-		item.Add(NewPr("text", strings.Join(texts, ",")))
+		item.Add(NewPr("text", pie.Strings{strings.Join(texts, ",")}))
 	}
 	return item, true
 }
@@ -153,13 +154,13 @@ func (g *GoQueryParser) Parser(html String, item IItem, sss ...string) (IItem, b
 		log.Error(err)
 		return item, false
 	}
-	var src = NewList()
-	var href = NewList()
+	var src = pie.Strings{}
+	var href = pie.Strings{}
 	doc.Find(g.pattern.String()).Each(func(i int, selection *goquery.Selection) {
 		if s, ok := selection.Attr("src"); ok {
-			src.Add(s)
+			src = src.Append(s)
 		} else if h, ok := selection.Attr("href"); ok {
-			href.Add(h)
+			href = href.Append(h)
 		} else {
 			key := newKey(html, sss...)
 			h, _ := selection.Html()
@@ -168,12 +169,12 @@ func (g *GoQueryParser) Parser(html String, item IItem, sss ...string) (IItem, b
 		}
 	})
 	switch {
-	case !src.Empty():
-		item.Add(NewPr("src", src.Items()))
-	case !href.Empty() && len(sss) != 0:
-		item.Add(NewPr(sss[0], href.Items()))
-	case !href.Empty():
-		item.Add(NewPr("href", href.Items()))
+	case src.Len() != 0:
+		item.Add(NewPr("src", src))
+	case href.Len() != 0 && len(sss) != 0:
+		item.Add(NewPr(sss[0], href))
+	case href.Len() != 0:
+		item.Add(NewPr("href", href))
 	}
 	return item, true
 }
@@ -274,13 +275,11 @@ func (r *RegexParser) Parser(htm String, interfaceI IItem, s ...string) (i IItem
 	if len(result) == 0 {
 		return
 	}
-	var val interface{}
 	if result.Len() == 1 {
-		val = result.First()
+		interfaceI.Add(NewPr(key, result.First()))
 	} else {
-		val = result.Unique()
+		interfaceI.Add(NewPr(key, result.Unique()))
 	}
-	interfaceI.Add(NewPr(key, val))
 	ret = true
 	return
 }
