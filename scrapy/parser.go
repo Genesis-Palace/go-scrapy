@@ -274,7 +274,13 @@ func (r *RegexParser) Parser(htm String, interfaceI IItem, s ...string) (i IItem
 	if len(result) == 0 {
 		return
 	}
-	interfaceI.Add(NewPr(key, result.Unique()))
+	var val interface{}
+	if result.Len() == 1 {
+		val = result.First()
+	} else {
+		val = result.Unique()
+	}
+	interfaceI.Add(NewPr(key, val))
 	ret = true
 	return
 }
