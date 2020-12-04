@@ -274,10 +274,7 @@ func (r *RegexParser) Parser(htm String, interfaceI IItem, s ...string) (i IItem
 	if len(result) == 0 {
 		return
 	}
-	for _, res := range result {
-		pr := NewPr(key, res.StringVal())
-		interfaceI.Add(pr)
-	}
+	interfaceI.Add(NewPr(key, result.Unique()))
 	ret = true
 	return
 }
