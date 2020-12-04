@@ -129,9 +129,9 @@ func (g *GoQueryTextParser) Parser(html String, item IItem, sss ...string) (IIte
 	})
 	switch len(sss) > 0 {
 	case true:
-		item.Add(NewPr(sss[0], pie.Strings{strings.Join(texts, ",")}))
+		item.Add(NewPr(sss[0], strings.Join(texts, ",")))
 	default:
-		item.Add(NewPr("text", pie.Strings{strings.Join(texts, ",")}))
+		item.Add(NewPr("text", strings.Join(texts, ",")))
 	}
 	return item, true
 }
