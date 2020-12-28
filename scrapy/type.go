@@ -4,6 +4,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"encoding/json"
+	"github.com/elliotchance/pie/pie"
 	"strings"
 	"sync"
 )
@@ -118,26 +119,26 @@ func (m *Map) Empty() bool {
 	return m.Size() == 0
 }
 
-type List struct {
+type StringList struct {
 	sync.RWMutex
-	l []interface{}
+	l pie.Strings
 }
 
-func (l *List) Contains(s string) bool {
+func (l *StringList) Contains(s string) bool {
 	return true
 }
 
-func (l *List) Add(item interface{}) {
+func (l *StringList) Add(item interface{}) {
 	l.Lock()
 	defer l.Unlock()
-	l.l = append(l.l, item)
+	l.l = l.l.Append(item.(string))
 }
 
-func (l *List) Size() int {
-	return len(l.l)
+func (l *StringList) Size() int {
+	return l.l.Len()
 }
 
-func (l *List) Dumps() (String, error) {
+func (l *StringList) Dumps() (String, error) {
 	js, err := json.Marshal(l.l)
 	if err != nil {
 		return "", err
@@ -145,11 +146,11 @@ func (l *List) Dumps() (String, error) {
 	return String(js), nil
 }
 
-func (l *List) Items() []interface{} {
+func (l *StringList) Items() pie.Strings {
 	return l.l
 }
 
-func (l *List) Load(b []byte) error {
+func (l *StringList) Load(b []byte) error {
 	err := json.Unmarshal(b, &l.l)
 	if err != nil {
 		return err
@@ -157,7 +158,7 @@ func (l *List) Load(b []byte) error {
 	return nil
 }
 
-func (l *List) Empty() bool {
+func (l *StringList) Empty() bool {
 	return l.Size() == 0
 }
 
@@ -168,9 +169,8 @@ func NewMap() *Map {
 	}
 }
 
-func NewList() *List {
-	return &List{
+func NewStringList() *StringList {
+	return &StringList{
 		RWMutex: sync.RWMutex{},
-		l:       []interface{}{},
 	}
 }

@@ -166,9 +166,9 @@ func NewNext(arg ...interface{}) (*Next, error) {
 }
 
 type Next struct {
-	G map[string]string       `json:"g"bson:"g"`
-	R map[string]string       `json:"r"bson:"r"`
-	T map[string]string       `json:"t"bson:"t"`
+	G map[string]string       `json:"g" bson:"g"`
+	R map[string]string       `json:"r" bson:"r"`
+	T map[string]string       `json:"t" bson:"t"`
 	A map[string]ParserResult `json:"a" bson:"a"`
 }
 

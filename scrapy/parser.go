@@ -37,7 +37,7 @@ func A(pattern _A, attrib string) *GoQueryAttribParser {
 type GoQueryAttribParser struct {
 	pattern String
 	DefaultParser
-	Result   *List
+	Result   *StringList
 	attrib   string
 	encoding string
 }
